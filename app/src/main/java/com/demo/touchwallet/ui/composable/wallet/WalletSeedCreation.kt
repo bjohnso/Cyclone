@@ -6,19 +6,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,16 +24,16 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.demo.touchwallet.R
 import com.demo.touchwallet.interfaces.NavigatorInterface
+import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseItemGrid
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
-import com.demo.touchwallet.ui.navigation.Screen
 
 @Composable
-fun WalletInit(window: Window, navigatorInterface: NavigatorInterface? = null) {
+fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
     SystemUi(
         window = window,
-        statusBarColor = "#241070".toColorInt(),
-        navigationBarColor = "#120838".toColorInt()
+        statusBarColor = "#222222".toColorInt(),
+        navigationBarColor = "#222222".toColorInt(),
     )
 
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -47,55 +45,88 @@ fun WalletInit(window: Window, navigatorInterface: NavigatorInterface? = null) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color("#241070".toColorInt()),
-                        Color("#120838".toColorInt())
+                        Color("#222222".toColorInt()),
+                        Color("#222222".toColorInt()),
                     )
                 )
             )
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 50.dp)
+                .padding(bottom = 50.dp, start = 30.dp, end = 30.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
-            ImageView(navigatorInterface = navigatorInterface)
-            MarketingCopy(navigatorInterface = navigatorInterface)
-            CreateWalletButton(navigatorInterface = navigatorInterface)
-            ImportWalletText(navigatorInterface = navigatorInterface)
+            Title()
+            SubTitle()
+            SeedPhraseItemGrid("#1A1A1A".toColorInt())
+            CopyToClipboard()
+            OKButton()
         }
     }
 }
 
 @Composable
-private fun ImageView(navigatorInterface: NavigatorInterface? = null) {
-    Image(
-        painter = painterResource(id = R.drawable.ic_splash_logo),
-        contentDescription = "",
-        contentScale = ContentScale.Fit,
-        modifier = Modifier
-            .padding(top = 50.dp, start = 30.dp, end = 30.dp)
-    )
-}
-
-@Composable
-private fun MarketingCopy(navigatorInterface: NavigatorInterface? = null) {
+private fun Title(navigatorInterface: NavigatorInterface? = null) {
     Text(
-        text = "A wallet built for cryptographically secure transactions while offline",
+        text = "Secret Recovery Phrase",
         textAlign = TextAlign.Center,
-        style = TextStyle(fontSize = 24.sp, color = Color.White, fontStyle = FontStyle.Italic),
+        style = TextStyle(fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold),
         modifier = Modifier
-            .padding(top = 10.dp, start = 30.dp, end = 30.dp)
+            .padding(top = 10.dp, start = 30.dp, end = 30.dp, bottom = 30.dp)
             .fillMaxWidth()
     )
 }
 
 @Composable
-private fun CreateWalletButton(navigatorInterface: NavigatorInterface? = null) {
+private fun SubTitle(navigatorInterface: NavigatorInterface? = null) {
+    Text(
+        text = "This is the only way you will be able to recover your account. Please store it somewhere safe!",
+        textAlign = TextAlign.Center,
+        style = TextStyle(fontSize = 18.sp, color = Color.LightGray, fontWeight = FontWeight.Bold),
+        modifier = Modifier
+            .padding(top = 10.dp, start = 30.dp, end = 30.dp, bottom = 50.dp)
+            .fillMaxWidth()
+    )
+}
+
+@Composable
+private fun CopyToClipboard() {
+    Row(
+        modifier = Modifier
+            .padding(top = 30.dp, start = 30.dp, end = 30.dp, bottom = 10.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_copy),
+            contentDescription = "",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .padding(end = 5.dp)
+        )
+
+        Text(
+            text = "Copy to clipboard",
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                fontSize = 16.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier
+                .padding(start = 5.dp)
+        )
+    }
+}
+
+@Composable
+private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
     Button(
         onClick = {
-            navigatorInterface?.navigate(Screen.WalletSeedCreation.route)
+
         },
         modifier = Modifier
             .padding(top = 50.dp, start = 30.dp, end = 30.dp)
@@ -104,7 +135,7 @@ private fun CreateWalletButton(navigatorInterface: NavigatorInterface? = null) {
         shape = RoundedCornerShape(50)
     ) {
         Text(
-            text = "Create a new wallet",
+            text = "OK, got it!",
             style = TextStyle(
                 fontSize = 18.sp,
                 color = Color.White,
@@ -112,21 +143,4 @@ private fun CreateWalletButton(navigatorInterface: NavigatorInterface? = null) {
             ),
         )
     }
-}
-
-@Composable
-private fun ImportWalletText(navigatorInterface: NavigatorInterface? = null) {
-    ClickableText(
-        text = AnnotatedString(text = "Import existing wallet"),
-        style = TextStyle(
-            fontSize = 18.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold
-        ),
-        onClick = {},
-        modifier = Modifier
-            .padding(top = 30.dp, start = 30.dp, end = 30.dp)
-            .fillMaxWidth(),
-    )
 }
