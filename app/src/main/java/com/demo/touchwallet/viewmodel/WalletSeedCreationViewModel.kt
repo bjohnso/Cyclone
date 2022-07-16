@@ -1,7 +1,6 @@
 package com.demo.touchwallet.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -31,14 +30,11 @@ class WalletSeedCreationViewModel: ViewModel() {
             .filterNotNull()
             .distinctUntilChanged()
             .map {
-                uiState.seedWords = it.getMnemonic(context = context)
                 uiState = uiState.apply {
                     isLoading = false
                     seedWords = it.getMnemonic(context = context)
                     error = null
                 }
-                Log.e("TEST_SEED", "FLOW ON SEEDS - ${uiState.seedWords?.joinToString(",")}")
-
                 uiState
             }
     }

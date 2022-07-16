@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.demo.touchwallet.usecase.MnemonicGenerator
+import com.demo.touchwallet.usecase.MnemonicEncoder
 
 @Entity(tableName = "tbl_seeds")
 data class SeedEntity(
@@ -22,7 +22,7 @@ data class SeedEntity(
     val seed: ByteArray,
 ) {
     fun getMnemonic(context: Context): List<String> {
-        return MnemonicGenerator.invoke(context, seed)
+        return MnemonicEncoder.invoke(context, seed)
     }
 
     override fun equals(other: Any?): Boolean {
