@@ -3,6 +3,7 @@ package com.demo.touchwallet.dao
 import androidx.room.*
 import androidx.room.OnConflictStrategy.IGNORE
 import com.demo.touchwallet.entity.SeedEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SeedDao {
@@ -13,6 +14,10 @@ interface SeedDao {
     @Transaction
     @Query("select * from tbl_seeds limit 1")
     fun retrieveSeed(): SeedEntity?
+
+    @Transaction
+    @Query("select * from tbl_seeds limit 1")
+    fun flowOnSeed(): Flow<SeedEntity?>
 
     @Transaction
     @Delete

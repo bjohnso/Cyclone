@@ -21,20 +21,20 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SeedPhraseItemGrid(gridItemColor: Int) {
+fun SeedPhraseItemGrid(seedWords: List<String>, gridItemColor: Int) {
     LazyVerticalGrid(
         cells = GridCells.Adaptive(minSize = 128.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(12) {
-            SeedPhraseItem(it, gridItemColor)
+        items(seedWords.size) {
+            SeedPhraseItem(it, seedWords[it], gridItemColor)
         }
     }
 }
 
 @Composable
-fun SeedPhraseItem(index: Int, itemColor: Int) {
+fun SeedPhraseItem(index: Int, word: String, itemColor: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,7 +115,7 @@ fun SeedPhraseItem(index: Int, itemColor: Int) {
                 ),
         ) {
             Text(
-                text = "Secret",
+                text = word,
                 textAlign = TextAlign.Start,
                 style = TextStyle(fontSize = 18.sp, color = Color.White),
                 modifier = Modifier

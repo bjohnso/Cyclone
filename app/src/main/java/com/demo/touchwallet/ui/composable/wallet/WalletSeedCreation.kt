@@ -1,6 +1,7 @@
 package com.demo.touchwallet.ui.composable.wallet
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,13 +9,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,13 +29,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.demo.touchwallet.R
+import com.demo.touchwallet.extensions.ConfigurationExtensions.heightPercentageDP
+import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseItemGrid
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
+import com.demo.touchwallet.viewmodel.WalletSeedCreationViewModel
+
+data class SeedPhraseGridState(
+    var seedWords: List<String> ? = null,
+    var isLoading: Boolean = true,
+    var error: Boolean? = null,
+)
 
 @Composable
 fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
+    val configuration = LocalConfiguration.current
+
+    val viewModel = WalletSeedCreationViewModel()
+    var uiState = remember {
+        viewModel.uiState
+    }
+
+    viewModel.flowOnCreateSeed(context = LocalContext.current)
+        .collectAsState(initial = null)
+
+    viewModel.flowStateOnSeedWords(LocalContext.current)
+        .collectAsState(initial = null).value?.let {
+            uiState = it
+        }
+
     SystemUi(
         window = window,
         statusBarColor = "#222222".toColorInt(),
@@ -53,14 +83,27 @@ fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 50.dp, start = 30.dp, end = 30.dp)
+                .padding(
+                    start = configuration.widthPercentageDP(5f),
+                    end = configuration.widthPercentageDP(5f),
+                    bottom = configuration.heightPercentageDP(2f),
+                )
                 .fillMaxWidth()
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
             Title()
             SubTitle()
-            SeedPhraseItemGrid("#1A1A1A".toColorInt())
+
+            val seedWords = uiState.seedWords
+            when {
+                uiState.isLoading -> spinner()
+                seedWords != null -> SeedPhraseItemGrid(
+                    seedWords,
+                    "#1A1A1A".toColorInt()
+                )
+            }
+
             CopyToClipboard()
             OKButton()
         }
@@ -69,33 +112,54 @@ fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
 
 @Composable
 private fun Title(navigatorInterface: NavigatorInterface? = null) {
+    val configuration = LocalConfiguration.current
+
     Text(
         text = "Secret Recovery Phrase",
         textAlign = TextAlign.Center,
         style = TextStyle(fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold),
         modifier = Modifier
-            .padding(top = 10.dp, start = 30.dp, end = 30.dp, bottom = 30.dp)
+            .padding(
+                top = configuration.heightPercentageDP(2f),
+                start = configuration.widthPercentageDP(5f),
+                end = configuration.widthPercentageDP(5f),
+                bottom = configuration.heightPercentageDP(2f)
+            )
             .fillMaxWidth()
     )
 }
 
 @Composable
 private fun SubTitle(navigatorInterface: NavigatorInterface? = null) {
+    val configuration = LocalConfiguration.current
+
     Text(
         text = "This is the only way you will be able to recover your account. Please store it somewhere safe!",
         textAlign = TextAlign.Center,
         style = TextStyle(fontSize = 18.sp, color = Color.LightGray, fontWeight = FontWeight.Bold),
         modifier = Modifier
-            .padding(top = 10.dp, start = 30.dp, end = 30.dp, bottom = 50.dp)
+            .padding(
+                top = configuration.heightPercentageDP(2f),
+                start = configuration.widthPercentageDP(5f),
+                end = configuration.widthPercentageDP(5f),
+                bottom = configuration.heightPercentageDP(5f)
+            )
             .fillMaxWidth()
     )
 }
 
 @Composable
 private fun CopyToClipboard() {
+    val configuration = LocalConfiguration.current
+
     Row(
         modifier = Modifier
-            .padding(top = 30.dp, start = 30.dp, end = 30.dp, bottom = 10.dp)
+            .padding(
+                top = configuration.heightPercentageDP(5f),
+                start = configuration.widthPercentageDP(5f),
+                end = configuration.widthPercentageDP(5f),
+                bottom = configuration.heightPercentageDP(2f)
+            )
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -105,7 +169,7 @@ private fun CopyToClipboard() {
             contentDescription = "",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .padding(end = 5.dp)
+                .padding(end = configuration.widthPercentageDP(1f),)
         )
 
         Text(
@@ -117,19 +181,26 @@ private fun CopyToClipboard() {
                 fontWeight = FontWeight.Bold
             ),
             modifier = Modifier
-                .padding(start = 5.dp)
+                .padding(start = configuration.widthPercentageDP(1f),)
         )
     }
 }
 
 @Composable
 private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
+    val configuration = LocalConfiguration.current
+
     Button(
         onClick = {
 
         },
         modifier = Modifier
-            .padding(top = 50.dp, start = 30.dp, end = 30.dp)
+            .padding(
+                top = configuration.heightPercentageDP(2f),
+                start = configuration.widthPercentageDP(5f),
+                end = configuration.widthPercentageDP(5f),
+                bottom = configuration.heightPercentageDP(2f)
+            )
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color("#0AB9EE".toColorInt())),
         shape = RoundedCornerShape(50)
@@ -142,5 +213,16 @@ private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
                 fontWeight = FontWeight.Bold
             ),
         )
+    }
+}
+
+@Composable
+private fun spinner() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
