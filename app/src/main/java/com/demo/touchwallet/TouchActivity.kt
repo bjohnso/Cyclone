@@ -14,8 +14,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.demo.touchwallet.interfaces.NavigatorInterface
-import com.demo.touchwallet.ui.composable.wallet.WalletInit
-import com.demo.touchwallet.ui.composable.wallet.WalletSeedCreation
+import com.demo.touchwallet.ui.composable.seedphrase.SeedCreationScreen
+import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseRecoveryParams
+import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseRecoveryScreen
+import com.demo.touchwallet.ui.composable.wallet.WalletInitialisationScreen
 import com.demo.touchwallet.ui.navigation.Screen
 import com.demo.touchwallet.ui.theme.TouchWalletTheme
 
@@ -32,12 +34,20 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
             TouchWalletTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    NavHost(navController = navController, startDestination = Screen.WalletInitScreen.route) {
-                        composable(route = Screen.WalletInitScreen.route) {
-                            WalletInit(window, this@TouchActivity)
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.WalletInitialisationScreen.route
+                    ) {
+                        composable(route = Screen.WalletInitialisationScreen.route) {
+                            WalletInitialisationScreen(window, this@TouchActivity)
                         }
-                        composable(route = Screen.WalletSeedCreation.route) {
-                            WalletSeedCreation(window, this@TouchActivity)
+                        composable(route = Screen.SeedPhraseCreationScreen.route) {
+                            SeedCreationScreen(window, this@TouchActivity)
+                        }
+                        composable(route = Screen.SeedPhraseRecoveryScreen.route) {
+                            SeedPhraseRecoveryScreen(
+                                SeedPhraseRecoveryParams(window, this@TouchActivity)
+                            )
                         }
                     }
                 }

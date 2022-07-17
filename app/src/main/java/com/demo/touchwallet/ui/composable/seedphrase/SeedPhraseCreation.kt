@@ -1,7 +1,6 @@
-package com.demo.touchwallet.ui.composable.wallet
+package com.demo.touchwallet.ui.composable.seedphrase
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,40 +24,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import com.demo.touchwallet.R
 import com.demo.touchwallet.extensions.ConfigurationExtensions.heightPercentageDP
 import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
+import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
-import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseItemGrid
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
-import com.demo.touchwallet.viewmodel.WalletSeedCreationViewModel
-
-data class SeedPhraseGridState(
-    var seedWords: List<String> ? = null,
-    var isLoading: Boolean = true,
-    var error: Boolean? = null,
-)
+import com.demo.touchwallet.viewmodel.SeedCreationViewModel
 
 @Composable
-fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
+fun SeedCreationScreen(window: Window, navigatorInterface: NavigatorInterface) {
     val configuration = LocalConfiguration.current
 
-    val viewModel = WalletSeedCreationViewModel()
-    var uiState = remember {
-        viewModel.uiState
-    }
+    val viewModel = ViewModelProvider(
+        LocalContext.current.activity() as ViewModelStoreOwner
+    )[SeedCreationViewModel::class.java]
 
     viewModel.flowOnCreateSeed(context = LocalContext.current)
         .collectAsState(initial = null)
 
     viewModel.flowStateOnSeedWords(LocalContext.current)
-        .collectAsState(initial = null).value?.let {
-            uiState = it
-        }
+        .collectAsState(initial = null)
 
     SystemUi(
         window = window,
@@ -95,11 +87,10 @@ fun WalletSeedCreation(window: Window, navigatorInterface: NavigatorInterface) {
             Title()
             SubTitle()
 
-            val seedWords = uiState.seedWords
             when {
-                uiState.isLoading -> spinner()
-                seedWords != null -> SeedPhraseItemGrid(
-                    seedWords,
+                viewModel.uiState.isLoading -> spinner()
+                viewModel.uiState.seedWords != null -> SeedPhraseItemGrid(
+                    viewModel.uiState.seedWords ?: listOf(),
                     "#1A1A1A".toColorInt()
                 )
             }

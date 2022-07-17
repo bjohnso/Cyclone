@@ -31,7 +31,7 @@ import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.navigation.Screen
 
 @Composable
-fun WalletInit(window: Window, navigatorInterface: NavigatorInterface? = null) {
+fun WalletInitialisationScreen(window: Window, navigatorInterface: NavigatorInterface? = null) {
     SystemUi(
         window = window,
         statusBarColor = "#241070".toColorInt(),
@@ -61,7 +61,7 @@ fun WalletInit(window: Window, navigatorInterface: NavigatorInterface? = null) {
             verticalArrangement = Arrangement.Center
         ) {
             ImageView(navigatorInterface = navigatorInterface)
-//            MarketingCopy(navigatorInterface = navigatorInterface)
+            MarketingCopy(navigatorInterface = navigatorInterface)
             CreateWalletButton(navigatorInterface = navigatorInterface)
             ImportWalletText(navigatorInterface = navigatorInterface)
         }
@@ -95,7 +95,7 @@ private fun MarketingCopy(navigatorInterface: NavigatorInterface? = null) {
 private fun CreateWalletButton(navigatorInterface: NavigatorInterface? = null) {
     Button(
         onClick = {
-            navigatorInterface?.navigate(Screen.WalletSeedCreation.route)
+            navigatorInterface?.navigate(Screen.SeedPhraseCreationScreen.route)
         },
         modifier = Modifier
             .padding(top = 50.dp, start = 30.dp, end = 30.dp)
@@ -124,7 +124,9 @@ private fun ImportWalletText(navigatorInterface: NavigatorInterface? = null) {
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
         ),
-        onClick = {},
+        onClick = {
+            navigatorInterface?.navigate(Screen.SeedPhraseRecoveryScreen.route)
+        },
         modifier = Modifier
             .padding(top = 30.dp, start = 30.dp, end = 30.dp)
             .fillMaxWidth(),
