@@ -5,9 +5,8 @@ import android.view.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.*
@@ -17,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -120,6 +120,13 @@ fun SeedPhraseRecoveryScreen(seedPhraseRecoveryParams: SeedPhraseRecoveryParams)
                     onWordChange = { word -> viewModel.updateWordAtCurrentIndex(word) }
                 )
             }
+
+            if (viewModel.isValid12WordMnemonic()) {
+                val context = LocalContext.current
+                DoneButton {
+                    viewModel.decodeMnemonic(context = context)
+                }
+            }
         }
     }
 }
@@ -185,20 +192,31 @@ private fun PreviousButton(onClick: () -> Unit) {
 }
 
 @Composable
-@Preview
-fun Preview(
-    @PreviewParameter(SeedPhraseRecoveryParamsProvider::class)
-    seedPhraseRecoveryParams: SeedPhraseRecoveryParams
-) {
-    SeedPhraseRecoveryScreen(seedPhraseRecoveryParams = seedPhraseRecoveryParams)
-}
+private fun DoneButton(onClick: () -> Unit) {
+    val configuration = LocalConfiguration.current
 
-class SeedPhraseRecoveryParamsProvider: PreviewParameterProvider<SeedPhraseRecoveryParams> {
-    override val values: Sequence<SeedPhraseRecoveryParams>
-        get() = sequenceOf(
-            SeedPhraseRecoveryParams(
-                window = null,
-                navigatorInterface = null
+    Button(
+        onClick = {
+            onClick.invoke()
+        },
+        modifier = Modifier
+            .padding(
+                top = configuration.heightPercentageDP(5f),
+                start = configuration.widthPercentageDP(5f),
+                end = configuration.widthPercentageDP(5f),
+                bottom = configuration.heightPercentageDP(2f)
             )
+            .fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color("#0AB9EE".toColorInt())),
+        shape = RoundedCornerShape(50)
+    ) {
+        Text(
+            text = "I'm done",
+            style = TextStyle(
+                fontSize = 18.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            ),
         )
+    }
 }

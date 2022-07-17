@@ -2,6 +2,7 @@ package com.demo.touchwallet.usecase
 
 import android.content.Context
 import com.demo.touchwallet.R
+import com.demo.touchwallet.extensions.ExceptionExtensions
 import java.util.*
 
 object MnemonicDecoder {
@@ -13,17 +14,23 @@ object MnemonicDecoder {
 
         var mnemonicBinaryString = ""
 
-        mnemonicList
-            .forEach {
-                val decimal = mnemonicWordList.indexOf(it)
-                require(decimal > -1)
+        ExceptionExtensions.tryOrDefault(null) {
+            mnemonicList
+                .forEach {
+                    val decimal = mnemonicWordList.indexOf(it)
+                    require(decimal > -1)
 
-                val binaryString = Integer
-                    .toBinaryString(1 shl 11 or decimal)
-                    .substring(1)
+                    val binaryString = Integer
+                        .toBinaryString(1 shl 11 or decimal)
+                        .substring(1)
 
-                mnemonicBinaryString += binaryString
-            }
+                    mnemonicBinaryString += binaryString
+                }
+        }
+
+        if (mnemonicBinaryString.length != mnemonicBitLength) {
+            return null
+        }
 
         val checksumBinaryString = mnemonicBinaryString.takeLast(
             mnemonicBitLength - entropyLength

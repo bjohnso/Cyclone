@@ -61,7 +61,7 @@ fun WalletInitialisationScreen(window: Window, navigatorInterface: NavigatorInte
             verticalArrangement = Arrangement.Center
         ) {
             ImageView(navigatorInterface = navigatorInterface)
-            MarketingCopy(navigatorInterface = navigatorInterface)
+//            MarketingCopy(navigatorInterface = navigatorInterface)
             CreateWalletButton(navigatorInterface = navigatorInterface)
             ImportWalletText(navigatorInterface = navigatorInterface)
         }
