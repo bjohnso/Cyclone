@@ -6,6 +6,7 @@ import com.demo.touchwallet.entity.KeyPairEntity
 import com.demo.touchwallet.entity.SeedEntity
 import com.demo.touchwallet.extensions.ByteExtensions.toHexString
 import com.demo.touchwallet.extensions.ContextExtensions.touchWalletApplication
+import com.demo.touchwallet.usecase.Derivation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -40,6 +41,8 @@ class SolanaRepository(context: Context) {
 
         persistSeed(seedEntity)
         persistKeyPair(keyPairEntity)
+
+        Derivation.invoke(seedEntity.seed)
 
         return true
     }
