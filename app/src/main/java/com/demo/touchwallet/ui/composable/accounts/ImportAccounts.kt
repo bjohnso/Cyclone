@@ -1,55 +1,48 @@
-package com.demo.touchwallet.ui.composable.seedphrase
+package com.demo.touchwallet.ui.composable.accounts
 
 import android.content.pm.ActivityInfo
 import android.view.Window
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import com.demo.touchwallet.R
 import com.demo.touchwallet.extensions.ConfigurationExtensions.heightPercentageDP
 import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
-import com.demo.touchwallet.viewmodel.SeedCreationViewModel
+import com.demo.touchwallet.ui.models.AccountModel
+import com.demo.touchwallet.viewmodel.ImportAccountsViewModel
 
 @Composable
-fun SeedCreationScreen(window: Window, navigatorInterface: NavigatorInterface) {
+fun ImportAccountScreen(window: Window, navigatorInterface: NavigatorInterface? = null) {
     val configuration = LocalConfiguration.current
 
     val viewModel = ViewModelProvider(
         LocalContext.current.activity() as ViewModelStoreOwner
-    )[SeedCreationViewModel::class.java]
+    )[ImportAccountsViewModel::class.java]
 
-    viewModel.flowOnCreateSeed(context = LocalContext.current)
-        .collectAsState(initial = null)
-
-    viewModel.flowStateOnSeedWords(LocalContext.current)
+    viewModel.flowStateOnDeriveAddresses(context = LocalContext.current)
         .collectAsState(initial = null)
 
     SystemUi(
@@ -76,9 +69,8 @@ fun SeedCreationScreen(window: Window, navigatorInterface: NavigatorInterface) {
         Column(
             modifier = Modifier
                 .padding(
-                    start = configuration.widthPercentageDP(5f),
-                    end = configuration.widthPercentageDP(5f),
-                    bottom = configuration.heightPercentageDP(2f),
+                    top = configuration.heightPercentageDP(10f),
+                    bottom = configuration.heightPercentageDP(5f),
                 )
                 .fillMaxWidth()
                 .fillMaxHeight(),
@@ -86,17 +78,12 @@ fun SeedCreationScreen(window: Window, navigatorInterface: NavigatorInterface) {
         ) {
             Title()
             SubTitle()
-
-            when {
-                viewModel.uiState.isLoading -> Spinner()
-                viewModel.uiState.seedWords != null -> SeedPhraseItemGrid(
-                    viewModel.uiState.seedWords ?: listOf(),
-                    "#1A1A1A".toColorInt()
-                )
+            if (viewModel.uiState.isLoading) {
+                Spinner()
+            } else if (viewModel.uiState.accounts != null) {
+                AccountList(viewModel.uiState.accounts ?: listOf())
+                ImportButton()
             }
-
-            CopyToClipboard()
-            OKButton()
         }
     }
 }
@@ -106,7 +93,7 @@ private fun Title(navigatorInterface: NavigatorInterface? = null) {
     val configuration = LocalConfiguration.current
 
     Text(
-        text = "Secret Recovery Phrase",
+        text = "Import Accounts",
         textAlign = TextAlign.Center,
         style = TextStyle(fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold),
         modifier = Modifier
@@ -125,7 +112,7 @@ private fun SubTitle(navigatorInterface: NavigatorInterface? = null) {
     val configuration = LocalConfiguration.current
 
     Text(
-        text = "This is the only way you will be able to recover your account. Please store it somewhere safe!",
+        text = "Choose wallet accounts to import",
         textAlign = TextAlign.Center,
         style = TextStyle(fontSize = 18.sp, color = Color.LightGray, fontWeight = FontWeight.Bold),
         modifier = Modifier
@@ -140,45 +127,75 @@ private fun SubTitle(navigatorInterface: NavigatorInterface? = null) {
 }
 
 @Composable
-private fun CopyToClipboard() {
+fun ColumnScope.AccountList(accounts: List<AccountModel>) {
     val configuration = LocalConfiguration.current
-
-    Row(
+    LazyColumn(
         modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .weight(1f)
             .padding(
-                top = configuration.heightPercentageDP(5f),
                 start = configuration.widthPercentageDP(5f),
                 end = configuration.widthPercentageDP(5f),
                 bottom = configuration.heightPercentageDP(2f)
             )
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 10.dp,
+                    topEnd = 10.dp,
+                    bottomStart = 10.dp,
+                    bottomEnd = 10.dp,
+                )
+            )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_copy),
-            contentDescription = "",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .padding(end = configuration.widthPercentageDP(1f),)
-        )
+        items(
+            items = accounts,
+        ) { model ->
+            AccountItem(model)
+            Divider(thickness = .5.dp, color = Color("#A5A5A5".toColorInt()))
+        }
+    }
+}
+
+@Composable
+fun AccountItem(account: AccountModel) {
+    Row(
+        modifier = Modifier
+            .height(height = 50.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color("#1A1A1A".toColorInt()),
+                        Color("#1A1A1A".toColorInt())
+                    )
+                )
+            )
+            .fillMaxWidth()
+            .padding(start = 10.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
+    ) {
+        val keyDisplay =
+            "${account.publicKey.take(4)}...${account.publicKey.takeLast(4)}"
 
         Text(
-            text = "Copy to clipboard",
-            textAlign = TextAlign.Center,
-            style = TextStyle(
-                fontSize = 16.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            ),
-            modifier = Modifier
-                .padding(start = configuration.widthPercentageDP(1f),)
+            text = keyDisplay,
+            textAlign = TextAlign.Start,
+            style = TextStyle(fontSize = 18.sp, color = Color("#A5A5A5".toColorInt())),
+        )
+
+        Spacer(modifier = Modifier.width(50.dp))
+            
+        Text(
+            text = "${account.solBalance} SOL",
+            textAlign = TextAlign.Start,
+            style = TextStyle(fontSize = 18.sp, color = Color("#A5A5A5".toColorInt())),
         )
     }
 }
 
 @Composable
-private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
+private fun ImportButton(navigatorInterface: NavigatorInterface? = null) {
     val configuration = LocalConfiguration.current
 
     Button(
@@ -187,7 +204,6 @@ private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
         },
         modifier = Modifier
             .padding(
-                top = configuration.heightPercentageDP(2f),
                 start = configuration.widthPercentageDP(5f),
                 end = configuration.widthPercentageDP(5f),
                 bottom = configuration.heightPercentageDP(2f)
@@ -197,7 +213,7 @@ private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
         shape = RoundedCornerShape(50)
     ) {
         Text(
-            text = "OK, got it!",
+            text = "Import Selected Accounts",
             style = TextStyle(
                 fontSize = 18.sp,
                 color = Color.White,

@@ -1,6 +1,7 @@
 package com.demo.touchwallet.ui.composable.seedphrase
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -34,17 +35,22 @@ import com.demo.touchwallet.interfaces.KeyboardActionsInterface
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
+import com.demo.touchwallet.ui.navigation.Screen
 import com.demo.touchwallet.viewmodel.SeedPhraseRecoveryViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 data class SeedPhraseRecoveryParams(
     val window: Window? = null,
-    val navigatorInterface: NavigatorInterface? = null
 )
 
 @Composable
-fun SeedPhraseRecoveryScreen(seedPhraseRecoveryParams: SeedPhraseRecoveryParams) {
+fun SeedPhraseRecoveryScreen(window: Window? = null, navigatorInterface: NavigatorInterface? = null) {
     val configuration = LocalConfiguration.current
     val viewModel: SeedPhraseRecoveryViewModel = viewModel()
+
+    val coroutineScope = rememberCoroutineScope()
 
     val keyboardActionsInterface = object: KeyboardActionsInterface {
         override fun onNext(text: String?) {
@@ -61,7 +67,7 @@ fun SeedPhraseRecoveryScreen(seedPhraseRecoveryParams: SeedPhraseRecoveryParams)
 
     }
 
-    seedPhraseRecoveryParams.window?.let {
+    window?.let {
         SystemUi(
             window = it,
             statusBarColor = "#222222".toColorInt(),
@@ -124,7 +130,21 @@ fun SeedPhraseRecoveryScreen(seedPhraseRecoveryParams: SeedPhraseRecoveryParams)
             if (viewModel.isValid12WordMnemonic()) {
                 val context = LocalContext.current
                 DoneButton {
-                    viewModel.decodeMnemonic(context = context)
+                    coroutineScope.launch {
+                        Log.e("TEST_ME", "DONE!")
+
+                        val decode = viewModel
+                            .decodeMnemonic(context = context)
+
+                        if (decode != null) {
+                            Log.e("TEST_ME", "DECODE")
+
+                            decode.collect {
+                                Log.e("TEST_ME", "COLLECT $it")
+                                if (it) navigatorInterface?.navigate(Screen.ImportAccountsScreen.route)
+                            }
+                        }
+                    }
                 }
             }
         }

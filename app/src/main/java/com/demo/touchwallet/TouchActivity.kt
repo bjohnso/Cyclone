@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.demo.touchwallet.interfaces.NavigatorInterface
+import com.demo.touchwallet.ui.composable.accounts.ImportAccountScreen
 import com.demo.touchwallet.ui.composable.seedphrase.SeedCreationScreen
 import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseRecoveryParams
 import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseRecoveryScreen
@@ -45,9 +46,10 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
                             SeedCreationScreen(window, this@TouchActivity)
                         }
                         composable(route = Screen.SeedPhraseRecoveryScreen.route) {
-                            SeedPhraseRecoveryScreen(
-                                SeedPhraseRecoveryParams(window, this@TouchActivity)
-                            )
+                            SeedPhraseRecoveryScreen(window, this@TouchActivity)
+                        }
+                        composable(route = Screen.ImportAccountsScreen.route) {
+                            ImportAccountScreen(window, this@TouchActivity)
                         }
                     }
                 }

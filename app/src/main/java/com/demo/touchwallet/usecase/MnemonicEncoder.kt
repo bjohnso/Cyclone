@@ -19,14 +19,10 @@ object MnemonicEncoder {
 
         var mnemonicBinaryString = ""
 
-        mnemonicBinaryString += entropyBits.toBinaryString(
-            0,
-            entropyBits.length() - 1
-        )
+        mnemonicBinaryString += entropyBits.toBinaryString(0)
 
         mnemonicBinaryString += hashedSeedBits.toBinaryString(
-            hashedSeedBits.length() - checksumLength,
-            hashedSeedBits.length() - 1
+            hashedSeedBits.length() - checksumLength
         )
 
         return mnemonicBinaryString

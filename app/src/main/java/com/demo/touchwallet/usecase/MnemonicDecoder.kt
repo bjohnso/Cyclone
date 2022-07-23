@@ -4,6 +4,7 @@ import android.content.Context
 import com.demo.touchwallet.R
 import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
 import com.demo.touchwallet.extensions.ExceptionExtensions
+import com.demo.touchwallet.extensions.StringExtensions.decodeBinaryString
 import java.security.MessageDigest
 import java.util.*
 
@@ -23,8 +24,8 @@ object MnemonicDecoder {
                     require(decimal > -1)
 
                     val binaryString = Integer
-                        .toBinaryString(1 shl 11 or decimal)
-                        .substring(1)
+                        .toBinaryString(decimal)
+                        .padStart(11, '0')
 
                     mnemonicBinaryString += binaryString
                 }
@@ -40,14 +41,7 @@ object MnemonicDecoder {
 
         mnemonicBinaryString = mnemonicBinaryString.take(entropyLength)
 
-        val entropy = BitSet(mnemonicBinaryString.length).apply {
-            for (i in mnemonicBinaryString.indices) {
-                this[i] = when(mnemonicBinaryString[i]) {
-                    '1' -> true
-                    else -> false
-                }
-            }
-        }.toByteArray()
+        val entropy = mnemonicBinaryString.decodeBinaryString()
 
         return if (
             validateChecksumForEntropy(
@@ -62,9 +56,9 @@ object MnemonicDecoder {
         val hashedEntropy = hashEntropy(entropy)
 
         val hashedEntropyBits = BitSet.valueOf(hashedEntropy)
+
         val hashedChecksum = hashedEntropyBits.toBinaryString(
-            hashedEntropyBits.length() - checksumLength,
-            hashedEntropyBits.length() - 1
+            hashedEntropyBits.length() - checksumLength
         )
 
         return checksum == hashedChecksum

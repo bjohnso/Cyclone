@@ -6,8 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.demo.touchwallet.repository.SolanaRepository
 import com.demo.touchwallet.ui.state.SeedPhraseRecoveryUiState
-import com.demo.touchwallet.usecase.MnemonicDecoder
+import kotlinx.coroutines.flow.Flow
 
 class SeedPhraseRecoveryViewModel: ViewModel() {
     var uiState by mutableStateOf(
@@ -16,7 +17,7 @@ class SeedPhraseRecoveryViewModel: ViewModel() {
     )
         private set
 
-    fun decodeMnemonic(context: Context) {
+    fun decodeMnemonic(context: Context): Flow<Boolean>? {
         val mnemonicList = when {
             isValid12WordMnemonic() -> uiState.seedWords.take(12).map { it.trim() }
             isValid24WordMnemonic() -> uiState.seedWords.take(24).map { it.trim() }
@@ -24,11 +25,15 @@ class SeedPhraseRecoveryViewModel: ViewModel() {
         }
 
         if (!mnemonicList.isNullOrEmpty()) {
-            MnemonicDecoder.invoke(
-                context = context,
-                mnemonicList = mnemonicList
-            )
+            return SolanaRepository
+                .getInstance(context = context)
+                .flowOnGenerateSeed(
+                    context = context,
+                    mnemonics = mnemonicList
+                )
         }
+
+        return null
     }
 
     fun isValid12WordMnemonic(): Boolean {
