@@ -2,6 +2,7 @@ package com.demo.touchwallet.usecase
 
 import android.content.Context
 import com.demo.touchwallet.R
+import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.*
@@ -18,14 +19,12 @@ object MnemonicEncoder {
 
         var mnemonicBinaryString = ""
 
-        mnemonicBinaryString += getBinaryString(
-            entropyBits,
+        mnemonicBinaryString += entropyBits.toBinaryString(
             0,
             entropyBits.length() - 1
         )
 
-        mnemonicBinaryString += getBinaryString(
-            hashedSeedBits,
+        mnemonicBinaryString += hashedSeedBits.toBinaryString(
             hashedSeedBits.length() - checksumLength,
             hashedSeedBits.length() - 1
         )
@@ -38,21 +37,8 @@ object MnemonicEncoder {
             }
     }
 
-    fun hashEntropy(entropy: ByteArray): ByteArray {
+    private fun hashEntropy(entropy: ByteArray): ByteArray {
         val messageDigest = MessageDigest.getInstance("SHA-256")
         return messageDigest.digest(entropy)
-    }
-
-    fun getBinaryString(bitSet: BitSet, startIndex: Int, endIndex: Int): String? {
-        var binaryString = ""
-
-        for (i in startIndex..endIndex) {
-            binaryString += when(bitSet[i]) {
-                true -> '1'
-                else -> '0'
-            }
-        }
-
-        return binaryString.ifBlank { null }
     }
 }

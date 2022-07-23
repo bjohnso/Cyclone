@@ -8,4 +8,12 @@ object ExceptionExtensions {
             defaultValue
         }
     }
+
+    suspend fun <T> tryOrDefaultAsync(defaultValue: T, f: suspend () -> T): T {
+        return try {
+            f()
+        } catch (e: Exception) {
+            defaultValue
+        }
+    }
 }

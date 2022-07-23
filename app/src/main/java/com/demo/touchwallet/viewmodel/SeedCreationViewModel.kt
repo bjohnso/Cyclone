@@ -22,7 +22,7 @@ class SeedCreationViewModel: ViewModel() {
             emit(
                 SolanaRepository
                 .getInstance(context = context)
-                .generateKeyPair()
+                    .generateSeed()
             )
         }.filterNotNull().distinctUntilChanged()
     }

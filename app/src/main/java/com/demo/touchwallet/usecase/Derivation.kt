@@ -1,5 +1,6 @@
 package com.demo.touchwallet.usecase
 
+import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
 import com.demo.touchwallet.extensions.StringExtensions.decodeBinaryString
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
@@ -14,7 +15,7 @@ object Derivation {
 
         val keyPairs = mutableListOf<AsymmetricCipherKeyPair>()
 
-        val indices = MutableList(66) {
+        val indices = List(66) {
             when (it) {
                 0 -> 44
                 1 -> 501
@@ -29,8 +30,8 @@ object Derivation {
             )
         )
 
-        var privateKey = MnemonicEncoder.getBinaryString(hmac, 0, 255) ?: ""
-        var chainCode = MnemonicEncoder.getBinaryString(hmac, 256, 511) ?: ""
+        var privateKey = hmac.toBinaryString(0, 255) ?: ""
+        var chainCode = hmac.toBinaryString(256, 511) ?: ""
 
         indices.forEachIndexed { i, item ->
             val index = (2.toDouble().pow(31) + item)
@@ -48,14 +49,14 @@ object Derivation {
                 )
             )
 
-            val entropy = MnemonicEncoder.getBinaryString(hmac, 0, 255) ?: ""
+            val entropy = hmac.toBinaryString(0, 255) ?: ""
 
             privateKey = deriveChildPrivateKey(
                 childEntropy = entropy,
                 parentKey = chainCode
             )
 
-            chainCode = MnemonicEncoder.getBinaryString(hmac, 256, 511) ?: ""
+            chainCode = hmac.toBinaryString(256, 511) ?: ""
 
             if (i > 1) {
                 val keyPair = getEd25519KeyPairFromPrivateKey(
@@ -69,7 +70,7 @@ object Derivation {
         return keyPairs
     }
 
-    fun getEd25519KeyPairFromPrivateKey(byteArray: ByteArray): AsymmetricCipherKeyPair {
+    private fun getEd25519KeyPairFromPrivateKey(byteArray: ByteArray): AsymmetricCipherKeyPair {
         val privateKey = Ed25519PrivateKeyParameters(byteArray)
         val publicKey = privateKey.generatePublicKey()
 
@@ -78,7 +79,7 @@ object Derivation {
         )
     }
 
-    fun hashSeed(seed: ByteArray, salt: ByteArray? = null): ByteArray {
+    private fun hashSeed(seed: ByteArray, salt: ByteArray? = null): ByteArray {
         val messageDigest = MessageDigest.getInstance("SHA-512")
         if (salt != null) {
             messageDigest.update(salt)
@@ -87,7 +88,7 @@ object Derivation {
         return messageDigest.digest(seed)
     }
 
-    fun deriveChildPrivateKey(childEntropy: String, parentKey: String): String {
+    private fun deriveChildPrivateKey(childEntropy: String, parentKey: String): String {
         val ed25519Order = BigInteger(
             "10000000D73E37DB0F1F98CCBE59434D5FAA8B4D70C9B0800000000000000000",
             16

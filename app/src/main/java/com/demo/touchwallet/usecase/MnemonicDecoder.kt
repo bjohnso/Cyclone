@@ -2,7 +2,9 @@ package com.demo.touchwallet.usecase
 
 import android.content.Context
 import com.demo.touchwallet.R
+import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
 import com.demo.touchwallet.extensions.ExceptionExtensions
+import java.security.MessageDigest
 import java.util.*
 
 object MnemonicDecoder {
@@ -55,17 +57,21 @@ object MnemonicDecoder {
         ) entropy else null
     }
 
-    fun validateChecksumForEntropy(entropy: ByteArray, checksum: String): Boolean {
+    private fun validateChecksumForEntropy(entropy: ByteArray, checksum: String): Boolean {
         val checksumLength = entropy.size / 4
-        val hashedEntropy = MnemonicEncoder.hashEntropy(entropy)
+        val hashedEntropy = hashEntropy(entropy)
 
         val hashedEntropyBits = BitSet.valueOf(hashedEntropy)
-        val hashedChecksum = MnemonicEncoder.getBinaryString(
-            hashedEntropyBits,
+        val hashedChecksum = hashedEntropyBits.toBinaryString(
             hashedEntropyBits.length() - checksumLength,
             hashedEntropyBits.length() - 1
         )
 
         return checksum == hashedChecksum
+    }
+
+    private fun hashEntropy(entropy: ByteArray): ByteArray {
+        val messageDigest = MessageDigest.getInstance("SHA-256")
+        return messageDigest.digest(entropy)
     }
 }
