@@ -47,7 +47,8 @@ class WalletViewModel: ViewModel() {
             emit(
                 listOf(
                     TokenModel(
-                        "Solana",
+                        tokenName = "Solana",
+                        tokenSymbol = "SOL",
                         accountModel.balance,
                         R.drawable.ic_sol
                     )

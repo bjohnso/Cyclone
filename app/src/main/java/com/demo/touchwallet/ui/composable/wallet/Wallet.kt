@@ -209,7 +209,7 @@ fun TokenItem(token: TokenModel) {
                 )
 
                 Text(
-                    text = "$${token.tokenBalance}",
+                    text = "${token.tokenBalance} ${token.tokenSymbol}",
                     textAlign = TextAlign.Start,
                     style = TextStyle(
                         fontSize = 15.sp,
