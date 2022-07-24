@@ -5,7 +5,7 @@ import androidx.room.ColumnInfo.TEXT
 import androidx.room.ColumnInfo.BLOB
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.demo.touchwallet.usecase.Base58Encoder
+import com.demo.touchwallet.crypto.Base58Encoder
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters

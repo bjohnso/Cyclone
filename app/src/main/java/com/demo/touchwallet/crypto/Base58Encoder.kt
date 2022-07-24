@@ -1,4 +1,4 @@
-package com.demo.touchwallet.usecase
+package com.demo.touchwallet.crypto
 
 import java.nio.charset.StandardCharsets
 

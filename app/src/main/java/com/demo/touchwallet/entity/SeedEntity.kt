@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.demo.touchwallet.usecase.MnemonicEncoder
+import com.demo.touchwallet.crypto.MnemonicEncoder
 
 @Entity(tableName = "tbl_seeds")
 data class SeedEntity(

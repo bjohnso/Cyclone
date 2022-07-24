@@ -10,6 +10,14 @@ interface KeyPairDao {
     fun persistKeyPairs(vararg keyPair: KeyPairEntity)
 
     @Transaction
+    @Query("select * from tbl_keypairs where public_key = :publicKey limit 1")
+    fun retrieveKeyPair(publicKey: String): KeyPairEntity?
+
+    @Transaction
+    @Query("select * from tbl_keypairs")
+    fun retrieveAllKeyPairs(): List<KeyPairEntity>
+
+    @Transaction
     @Delete
     fun destroyKeyPairs(vararg keyPair: KeyPairEntity)
 

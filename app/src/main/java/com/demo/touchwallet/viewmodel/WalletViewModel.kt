@@ -7,13 +7,12 @@ import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.demo.touchwallet.R
-import com.demo.touchwallet.repository.SolanaRepository
-import com.demo.touchwallet.ui.models.AccountModel
+import com.demo.touchwallet.entity.KeyPairEntity
 import com.demo.touchwallet.ui.models.TokenModel
 import com.demo.touchwallet.ui.state.WalletUiState
-import com.demo.touchwallet.usecase.Base58Encoder
+import com.demo.touchwallet.usecase.CreateWalletUseCase
+import com.demo.touchwallet.usecase.RetrieveWalletUseCase
 import kotlinx.coroutines.flow.*
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 
 class WalletViewModel: ViewModel() {
     var uiState by mutableStateOf(
@@ -22,14 +21,20 @@ class WalletViewModel: ViewModel() {
     )
         private set
 
-    fun flowOnWallet() {
+    fun flowOnWallet(context: Context): Flow<KeyPairEntity?> {
+        return flow {
+            val keyPair = RetrieveWalletUseCase.retrieveCurrentWallet(
+                context = context
+            ) ?: CreateWalletUseCase.createKeypair(
+                context = context
+            )
 
+            emit(keyPair)
+        }.distinctUntilChanged()
+            .onEach { onWallet(it) }
     }
 
-    fun flowOnTokenList(
-        walletAddress: String,
-        context: Context
-    ): Flow<List<TokenModel>> {
+    fun flowOnTokenList(): Flow<List<TokenModel>> {
         return flow {
             emit(
                 listOf(
@@ -42,18 +47,23 @@ class WalletViewModel: ViewModel() {
             )
         }.filterNotNull()
             .distinctUntilChanged()
-            .map {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    hasError = false,
-                    currentAddress = walletAddress,
-                    currentTotalBalance = it
-                        .map { t -> t.tokenBalance }
-                        .reduceOrNull { acc, next -> acc + next } ?: 0f,
-                    tokens = it
-                )
+            .onEach { onTokenList(it) }
+    }
 
-                it
-            }
+    private fun onWallet(keyPairEntity: KeyPairEntity?) {
+        keyPairEntity?.let {
+            uiState = uiState.copy(currentAddress = keyPairEntity.publicKey)
+        }
+    }
+
+    private fun onTokenList(tokens: List<TokenModel>) {
+        uiState = uiState.copy(
+            isLoading = false,
+            hasError = false,
+            currentTotalBalance = tokens
+                .map { t -> t.tokenBalance }
+                .reduceOrNull { acc, next -> acc + next } ?: 0f,
+            tokens = tokens
+        )
     }
 }

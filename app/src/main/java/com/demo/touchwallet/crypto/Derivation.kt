@@ -1,4 +1,4 @@
-package com.demo.touchwallet.usecase
+package com.demo.touchwallet.crypto
 
 import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
 import com.demo.touchwallet.extensions.StringExtensions.decodeBinaryString

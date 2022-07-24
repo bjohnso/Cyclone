@@ -39,7 +39,7 @@ abstract class SolanaDatabase: RoomDatabase() {
             }, false)
 
             return databaseBuilder(context, SolanaDatabase::class.java, "solana.db")
-                .openHelperFactory(factory)
+//                .openHelperFactory(factory)
                 .fallbackToDestructiveMigration()
                 .build()
         }

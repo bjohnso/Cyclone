@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.demo.touchwallet.repository.SolanaRepository
 import com.demo.touchwallet.ui.models.AccountModel
 import com.demo.touchwallet.ui.state.ImportAccountsUiState
-import com.demo.touchwallet.usecase.Base58Encoder
+import com.demo.touchwallet.crypto.Base58Encoder
 import kotlinx.coroutines.flow.*
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 

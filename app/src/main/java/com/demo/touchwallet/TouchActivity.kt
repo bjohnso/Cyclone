@@ -22,6 +22,13 @@ import com.demo.touchwallet.ui.composable.wallet.WalletCreateScreen
 import com.demo.touchwallet.ui.composable.wallet.WalletScreen
 import com.demo.touchwallet.ui.navigation.Screen
 import com.demo.touchwallet.ui.theme.TouchWalletTheme
+import com.demo.touchwallet.usecase.RetrieveSeedUseCase
+import com.demo.touchwallet.usecase.RetrieveWalletUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 class TouchActivity : ComponentActivity(), NavigatorInterface {
 
@@ -56,12 +63,7 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
                             route = Screen.WalletScreen.route,
                             arguments = Screen.WalletScreen.arguments ?: listOf()
                         ) {
-                            val walletAddress = it.arguments?.getString(
-                                Screen.WalletScreen.Arguments.wallet_address.name
-                            ) ?: ""
-
                             WalletScreen(
-                                walletAddress = walletAddress,
                                 window = window,
                                 navigatorInterface = this@TouchActivity
                             )
@@ -87,6 +89,31 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
                     }
                 }
             }
+
+            onStartUp()
+        }
+    }
+
+    private fun onStartUp() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val seed = RetrieveSeedUseCase
+                .retrieveCurrentSeed(this@TouchActivity)
+
+            delay(1000)
+
+            val route = when (seed?.seed) {
+                null -> Screen.WalletCreateScreen.route
+                else -> Screen.WalletScreen.route
+            }
+
+            val navOptions = NavOptions
+                .Builder()
+                .setPopUpTo(
+                    route = Screen.SplashScreen.route,
+                    inclusive = true
+                ).build()
+
+            navController.navigate(route, navOptions)
         }
     }
 

@@ -10,8 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,11 +36,15 @@ import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.models.TokenModel
+import com.demo.touchwallet.usecase.CreateWalletUseCase
+import com.demo.touchwallet.usecase.RetrieveOrCreateWalletUseCase
+import com.demo.touchwallet.usecase.RetrieveWalletUseCase
 import com.demo.touchwallet.viewmodel.WalletViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 
 @Composable
 fun WalletScreen(
-    walletAddress: String,
     window: Window,
     navigatorInterface: NavigatorInterface? = null
 ) {
@@ -51,10 +54,18 @@ fun WalletScreen(
         LocalContext.current.activity() as ViewModelStoreOwner
     )[WalletViewModel::class.java]
 
-    viewModel.flowOnTokenList(
-        walletAddress = walletAddress,
-        context = LocalContext.current
-    ).collectAsState(initial = null)
+    val flowOnWallet by rememberUpdatedState(
+        newValue = viewModel.flowOnWallet(context = LocalContext.current)
+    )
+
+    val flowOnTokenList by rememberUpdatedState(
+        newValue = viewModel.flowOnTokenList()
+    )
+
+    LaunchedEffect(true) {
+        flowOnWallet.collect()
+        flowOnTokenList.collect()
+    }
     
     SystemUi(
         window = window,

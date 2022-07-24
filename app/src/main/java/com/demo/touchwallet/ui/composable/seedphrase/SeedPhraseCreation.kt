@@ -10,9 +10,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.demo.touchwallet.R
 import com.demo.touchwallet.extensions.ConfigurationExtensions.heightPercentageDP
@@ -36,21 +33,28 @@ import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
+import com.demo.touchwallet.usecase.CreateWalletUseCase
 import com.demo.touchwallet.viewmodel.SeedCreationViewModel
 
 @Composable
 fun SeedCreationScreen(window: Window, navigatorInterface: NavigatorInterface) {
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
 
     val viewModel = ViewModelProvider(
         LocalContext.current.activity() as ViewModelStoreOwner
     )[SeedCreationViewModel::class.java]
 
-    viewModel.flowOnCreateSeed(context = LocalContext.current)
-        .collectAsState(initial = null)
+    val createSeed by rememberUpdatedState(newValue = suspend {
+        CreateWalletUseCase.createSeed(context = context)
+    })
 
     viewModel.flowStateOnSeedWords(LocalContext.current)
         .collectAsState(initial = null)
+
+    LaunchedEffect(true) {
+        createSeed()
+    }
 
     SystemUi(
         window = window,

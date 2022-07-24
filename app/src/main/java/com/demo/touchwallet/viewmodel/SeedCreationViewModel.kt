@@ -17,16 +17,6 @@ class SeedCreationViewModel: ViewModel() {
     )
         private set
 
-    fun flowOnCreateSeed(context: Context): Flow<Boolean> {
-        return flow {
-            emit(
-                SolanaRepository
-                .getInstance(context = context)
-                    .generateSeed()
-            )
-        }.filterNotNull().distinctUntilChanged()
-    }
-
     fun flowStateOnSeedWords(context: Context): Flow<SeedPhraseCreationUiState?> {
         return SolanaRepository
             .getInstance(context = context)

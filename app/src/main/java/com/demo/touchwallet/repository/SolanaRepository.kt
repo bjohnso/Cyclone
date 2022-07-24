@@ -7,8 +7,8 @@ import com.demo.touchwallet.entity.SeedEntity
 import com.demo.touchwallet.extensions.ByteExtensions.toHexString
 import com.demo.touchwallet.extensions.ContextExtensions.touchWalletApplication
 import com.demo.touchwallet.extensions.ExceptionExtensions
-import com.demo.touchwallet.usecase.Derivation
-import com.demo.touchwallet.usecase.MnemonicDecoder
+import com.demo.touchwallet.crypto.Derivation
+import com.demo.touchwallet.crypto.MnemonicDecoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,28 +18,6 @@ import java.security.SecureRandom
 
 class SolanaRepository(context: Context) {
     private var db: SolanaDatabase = SolanaDatabase(context.touchWalletApplication())
-
-    suspend fun generateSeed(): Boolean {
-        return ExceptionExtensions.tryOrDefaultAsync(false) {
-            val seed: ByteArray?
-            var seedEntity = retrieveSeed()
-
-            val random = SecureRandom()
-
-            if (seedEntity?.seed == null) {
-                seed = random.generateSeed(16)
-                seedEntity = SeedEntity(
-                    hex = seed.toHexString(),
-                    seed = seed
-                )
-            } else random.setSeed(seedEntity.seed)
-
-            destroyAllSeeds()
-            persistSeed(seedEntity)
-
-            return@tryOrDefaultAsync true
-        }
-    }
 
     fun flowOnGenerateSeed(context: Context, mnemonics: List<String>): Flow<Boolean> {
         return flow {
@@ -95,9 +73,24 @@ class SolanaRepository(context: Context) {
             db.seedDao().destroyAllSeeds()
         }
 
+    suspend fun retrieveKeyPair(address: String) =
+        withContext(Dispatchers.IO) {
+            db.keyPairDao().retrieveKeyPair(address)
+        }
+
+    suspend fun retrieveAllKeyPairs() =
+        withContext(Dispatchers.IO) {
+            db.keyPairDao().retrieveAllKeyPairs()
+        }
+
     suspend fun persistKeyPair(vararg keyPair: KeyPairEntity) =
         withContext(Dispatchers.IO) {
             db.keyPairDao().persistKeyPairs(*keyPair)
+        }
+
+    suspend fun destroyAllKeyPairs() =
+        withContext(Dispatchers.IO) {
+            db.keyPairDao().destroyAllKeyPairs()
         }
 
     companion object {
