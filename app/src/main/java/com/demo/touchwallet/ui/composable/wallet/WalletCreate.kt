@@ -31,7 +31,7 @@ import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.navigation.Screen
 
 @Composable
-fun WalletInitialisationScreen(window: Window, navigatorInterface: NavigatorInterface? = null) {
+fun WalletCreateScreen(window: Window, navigatorInterface: NavigatorInterface? = null) {
     SystemUi(
         window = window,
         statusBarColor = "#241070".toColorInt(),
