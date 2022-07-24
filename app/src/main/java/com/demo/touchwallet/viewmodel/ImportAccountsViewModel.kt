@@ -6,12 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.demo.touchwallet.repository.SolanaRepository
 import com.demo.touchwallet.ui.models.AccountModel
 import com.demo.touchwallet.ui.state.ImportAccountsUiState
-import com.demo.touchwallet.crypto.Base58Encoder
+import com.demo.touchwallet.entity.KeyPairEntity
+import com.demo.touchwallet.usecase.DeriveAccountsUseCase
 import kotlinx.coroutines.flow.*
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 
 class ImportAccountsViewModel: ViewModel() {
     var uiState by mutableStateOf(
@@ -20,25 +19,25 @@ class ImportAccountsViewModel: ViewModel() {
     )
         private set
 
-    fun flowStateOnDeriveAddresses(context: Context): Flow<ImportAccountsUiState?> {
-        return SolanaRepository
-            .getInstance(context = context)
-            .flowOnDeriveAccounts()
-            .filterNotNull()
-            .distinctUntilChanged()
-            .map {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    hasError = false,
-                    accounts = it.map { pair ->
-                        val publicKey = (pair.public as Ed25519PublicKeyParameters).encoded
-                        AccountModel(
-                            publicKey = Base58Encoder.invoke(publicKey),
-                            solBalance = 0f
-                        )
-                    }
-                )
-                uiState
-            }
+    fun flowOnDerive(context: Context): Flow<List<KeyPairEntity>?> {
+        return flow {
+            emit(DeriveAccountsUseCase.deriveAccounts(context = context))
+        }.distinctUntilChanged()
+            .onEach { onDeriveAddresses(it) }
+    }
+
+    private fun onDeriveAddresses(keyPairs: List<KeyPairEntity>?) {
+        if (!keyPairs.isNullOrEmpty()) {
+            uiState = uiState.copy(
+                isLoading = false,
+                hasError = false,
+                accounts = keyPairs.map { pair ->
+                    AccountModel(
+                        publicKey = pair.publicKey,
+                        solBalance = 0f
+                    )
+                }
+            )
+        }
     }
 }

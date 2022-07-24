@@ -19,43 +19,6 @@ import java.security.SecureRandom
 class SolanaRepository(context: Context) {
     private var db: SolanaDatabase = SolanaDatabase(context.touchWalletApplication())
 
-    fun flowOnGenerateSeed(context: Context, mnemonics: List<String>): Flow<Boolean> {
-        return flow {
-            val success = ExceptionExtensions.tryOrDefaultAsync(false) {
-                val seed = MnemonicDecoder.invoke(
-                    context = context,
-                    mnemonicList = mnemonics
-                )
-
-                if (seed != null) {
-                    val seedEntity = SeedEntity(
-                        hex = seed.toHexString(),
-                        seed = seed
-                    )
-
-                    destroyAllSeeds()
-                    persistSeed(seedEntity)
-                } else return@tryOrDefaultAsync false
-
-                return@tryOrDefaultAsync true
-            }
-
-            emit(success)
-        }
-    }
-
-    fun flowOnDeriveAccounts(): Flow<List<AsymmetricCipherKeyPair>?> {
-        return flow {
-            val seed = retrieveSeed()
-
-            if (seed?.seed != null) {
-                emit(Derivation.invoke(seed.seed))
-            } else {
-                emit(null)
-            }
-        }
-    }
-
     fun flowOnSeed(): Flow<SeedEntity?> = db.seedDao().flowOnSeed()
 
     suspend fun retrieveSeed() =

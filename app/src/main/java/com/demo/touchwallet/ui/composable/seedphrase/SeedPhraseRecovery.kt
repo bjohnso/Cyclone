@@ -1,7 +1,6 @@
 package com.demo.touchwallet.ui.composable.seedphrase
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,9 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -36,14 +32,9 @@ import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.navigation.Screen
+import com.demo.touchwallet.usecase.DecodeMnemonicUseCase
 import com.demo.touchwallet.viewmodel.SeedPhraseRecoveryViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
-data class SeedPhraseRecoveryParams(
-    val window: Window? = null,
-)
 
 @Composable
 fun SeedPhraseRecoveryScreen(window: Window? = null, navigatorInterface: NavigatorInterface? = null) {
@@ -127,22 +118,23 @@ fun SeedPhraseRecoveryScreen(window: Window? = null, navigatorInterface: Navigat
                 )
             }
 
-            if (viewModel.isValid12WordMnemonic()) {
+            if (
+                DecodeMnemonicUseCase.isValid12WordMnemonic(
+                    viewModel.uiState.seedWords
+                )
+            ) {
                 val context = LocalContext.current
                 DoneButton {
                     coroutineScope.launch {
-                        Log.e("TEST_ME", "DONE!")
-
-                        val decode = viewModel
-                            .decodeMnemonic(context = context)
-
-                        if (decode != null) {
-                            Log.e("TEST_ME", "DECODE")
-
-                            decode.collect {
-                                Log.e("TEST_ME", "COLLECT $it")
-                                if (it) navigatorInterface?.navigate(Screen.ImportAccountsScreen.route)
-                            }
+                        if (
+                            DecodeMnemonicUseCase.decodeMnemonic(
+                                seedWords = viewModel.uiState.seedWords,
+                                context = context
+                            )
+                        ) {
+                            navigatorInterface?.navigate(
+                                Screen.ImportAccountsScreen.route
+                            )
                         }
                     }
                 }

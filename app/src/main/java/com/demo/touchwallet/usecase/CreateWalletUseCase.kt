@@ -3,12 +3,15 @@ package com.demo.touchwallet.usecase
 import android.content.Context
 import com.demo.touchwallet.crypto.Base58Encoder
 import com.demo.touchwallet.crypto.Derivation
+import com.demo.touchwallet.crypto.MnemonicDecoder
 import com.demo.touchwallet.entity.KeyPairEntity
 import com.demo.touchwallet.entity.SeedEntity
 import com.demo.touchwallet.extensions.ByteExtensions.toHexString
 import com.demo.touchwallet.extensions.ExceptionExtensions
 import com.demo.touchwallet.repository.SolanaRepository
 import com.demo.touchwallet.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import java.security.SecureRandom
 
@@ -35,6 +38,32 @@ object CreateWalletUseCase {
             repository.destroyAllSeeds()
 
             repository.persistSeed(seedEntity)
+
+            return@tryOrDefaultAsync true
+        }
+    }
+
+    suspend fun restoreSeed(context: Context, mnemonics: List<String>): Boolean {
+        return ExceptionExtensions.tryOrDefaultAsync(false) {
+            val repository = SolanaRepository
+                .getInstance(context = context)
+
+            val seed = MnemonicDecoder.invoke(
+                context = context,
+                mnemonicList = mnemonics
+            )
+
+            if (seed != null) {
+                val seedEntity = SeedEntity(
+                    hex = seed.toHexString(),
+                    seed = seed
+                )
+
+                repository.destroyAllKeyPairs()
+                repository.destroyAllSeeds()
+
+                repository.persistSeed(seedEntity)
+            } else return@tryOrDefaultAsync false
 
             return@tryOrDefaultAsync true
         }
