@@ -1,6 +1,6 @@
 package com.demo.touchwallet.ui.models
 
-data class AccountModel(
+data class SolanaAccountModel(
     val publicKey: String,
-    val solBalance: Float
+    val balance: Float
     )

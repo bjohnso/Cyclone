@@ -8,17 +8,15 @@ import com.demo.touchwallet.entity.KeyPairEntity
 import com.demo.touchwallet.entity.SeedEntity
 import com.demo.touchwallet.extensions.ByteExtensions.toHexString
 import com.demo.touchwallet.extensions.ExceptionExtensions
-import com.demo.touchwallet.repository.SolanaRepository
-import com.demo.touchwallet.repository.UserRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import com.demo.touchwallet.repository.WalletRepository
+import com.demo.touchwallet.repository.AccountRepository
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import java.security.SecureRandom
 
 object CreateWalletUseCase {
     suspend fun createSeed(context: Context): Boolean {
         return ExceptionExtensions.tryOrDefaultAsync(false) {
-            val repository = SolanaRepository
+            val repository = WalletRepository
                 .getInstance(context = context)
 
             val seed: ByteArray?
@@ -45,7 +43,7 @@ object CreateWalletUseCase {
 
     suspend fun restoreSeed(context: Context, mnemonics: List<String>): Boolean {
         return ExceptionExtensions.tryOrDefaultAsync(false) {
-            val repository = SolanaRepository
+            val repository = WalletRepository
                 .getInstance(context = context)
 
             val seed = MnemonicDecoder.invoke(
@@ -70,10 +68,10 @@ object CreateWalletUseCase {
     }
 
     suspend fun createKeypair(context: Context): KeyPairEntity? {
-        val solanaRepository = SolanaRepository
+        val solanaRepository = WalletRepository
             .getInstance(context = context)
 
-        val userRepository = UserRepository
+        val userRepository = AccountRepository
             .getInstance()
 
         val seed = solanaRepository.retrieveSeed()

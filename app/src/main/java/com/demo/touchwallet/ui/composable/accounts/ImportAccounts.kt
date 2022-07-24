@@ -30,7 +30,7 @@ import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
-import com.demo.touchwallet.ui.models.AccountModel
+import com.demo.touchwallet.ui.models.SolanaAccountModel
 import com.demo.touchwallet.viewmodel.ImportAccountsViewModel
 import kotlinx.coroutines.flow.collect
 
@@ -132,7 +132,7 @@ private fun SubTitle(navigatorInterface: NavigatorInterface? = null) {
 }
 
 @Composable
-fun ColumnScope.AccountList(accounts: List<AccountModel>) {
+fun ColumnScope.AccountList(accounts: List<SolanaAccountModel>) {
     val configuration = LocalConfiguration.current
     LazyColumn(
         modifier = Modifier
@@ -163,7 +163,7 @@ fun ColumnScope.AccountList(accounts: List<AccountModel>) {
 }
 
 @Composable
-fun AccountItem(account: AccountModel) {
+fun AccountItem(account: SolanaAccountModel) {
     Row(
         modifier = Modifier
             .height(height = 50.dp)
@@ -192,7 +192,7 @@ fun AccountItem(account: AccountModel) {
         Spacer(modifier = Modifier.width(50.dp))
             
         Text(
-            text = "${account.solBalance} SOL",
+            text = "${account.balance} SOL",
             textAlign = TextAlign.Start,
             style = TextStyle(fontSize = 18.sp, color = Color("#A5A5A5".toColorInt())),
         )

@@ -7,10 +7,11 @@ import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.demo.touchwallet.R
-import com.demo.touchwallet.entity.KeyPairEntity
+import com.demo.touchwallet.ui.models.SolanaAccountModel
 import com.demo.touchwallet.ui.models.TokenModel
 import com.demo.touchwallet.ui.state.WalletUiState
 import com.demo.touchwallet.usecase.CreateWalletUseCase
+import com.demo.touchwallet.usecase.GetAccountBalanceUseCase
 import com.demo.touchwallet.usecase.RetrieveWalletUseCase
 import kotlinx.coroutines.flow.*
 
@@ -21,7 +22,7 @@ class WalletViewModel: ViewModel() {
     )
         private set
 
-    fun flowOnWallet(context: Context): Flow<KeyPairEntity?> {
+    fun flowOnWallet(context: Context): Flow<SolanaAccountModel?> {
         return flow {
             val keyPair = RetrieveWalletUseCase.retrieveCurrentWallet(
                 context = context
@@ -29,18 +30,25 @@ class WalletViewModel: ViewModel() {
                 context = context
             )
 
-            emit(keyPair)
+            emit(
+                if (keyPair?.publicKey != null) {
+                    GetAccountBalanceUseCase.getAccountBalance(
+                        pubKey = keyPair.publicKey,
+                        context = context
+                    )
+                } else null
+            )
         }.distinctUntilChanged()
             .onEach { onWallet(it) }
     }
 
-    fun flowOnTokenList(): Flow<List<TokenModel>> {
+    fun flowOnTokenList(accountModel: SolanaAccountModel): Flow<List<TokenModel>> {
         return flow {
             emit(
                 listOf(
                     TokenModel(
                         "Solana",
-                        0f,
+                        accountModel.balance,
                         R.drawable.ic_sol
                     )
                 )
@@ -50,9 +58,9 @@ class WalletViewModel: ViewModel() {
             .onEach { onTokenList(it) }
     }
 
-    private fun onWallet(keyPairEntity: KeyPairEntity?) {
-        keyPairEntity?.let {
-            uiState = uiState.copy(currentAddress = keyPairEntity.publicKey)
+    private fun onWallet(solanaAccount: SolanaAccountModel?) {
+        solanaAccount?.let {
+            uiState = uiState.copy(currentAddress = solanaAccount.publicKey)
         }
     }
 
@@ -60,9 +68,9 @@ class WalletViewModel: ViewModel() {
         uiState = uiState.copy(
             isLoading = false,
             hasError = false,
-            currentTotalBalance = tokens
-                .map { t -> t.tokenBalance }
-                .reduceOrNull { acc, next -> acc + next } ?: 0f,
+//            currentTotalBalance = tokens
+//                .map { t -> t.tokenBalance }
+//                .reduceOrNull { acc, next -> acc + next } ?: 0f,
             tokens = tokens
         )
     }

@@ -1,23 +1,16 @@
 package com.demo.touchwallet.repository
 
 import android.content.Context
-import com.demo.touchwallet.database.SolanaDatabase
+import com.demo.touchwallet.database.WalletDatabase
 import com.demo.touchwallet.entity.KeyPairEntity
 import com.demo.touchwallet.entity.SeedEntity
-import com.demo.touchwallet.extensions.ByteExtensions.toHexString
 import com.demo.touchwallet.extensions.ContextExtensions.touchWalletApplication
-import com.demo.touchwallet.extensions.ExceptionExtensions
-import com.demo.touchwallet.crypto.Derivation
-import com.demo.touchwallet.crypto.MnemonicDecoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair
-import java.security.SecureRandom
 
-class SolanaRepository(context: Context) {
-    private var db: SolanaDatabase = SolanaDatabase(context.touchWalletApplication())
+class WalletRepository(context: Context) {
+    private var db: WalletDatabase = WalletDatabase(context.touchWalletApplication())
 
     fun flowOnSeed(): Flow<SeedEntity?> = db.seedDao().flowOnSeed()
 
@@ -57,10 +50,10 @@ class SolanaRepository(context: Context) {
         }
 
     companion object {
-        private var instance: SolanaRepository? = null
+        private var instance: WalletRepository? = null
 
-        fun getInstance(context: Context): SolanaRepository {
-            return instance ?: SolanaRepository(context).also {
+        fun getInstance(context: Context): WalletRepository {
+            return instance ?: WalletRepository(context).also {
                 instance = it
             }
         }

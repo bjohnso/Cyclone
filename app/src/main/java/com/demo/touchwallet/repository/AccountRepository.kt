@@ -9,7 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class UserRepository {
+class AccountRepository {
     suspend fun setDefaultWallet(context: Context, walletAddress: String) {
         context.dataStore.edit { preferences ->
             preferences[DEFAULT_WALLET] = walletAddress
@@ -23,16 +23,16 @@ class UserRepository {
     }
 
     companion object {
-        private var instance: UserRepository? = null
+        private var instance: AccountRepository? = null
 
-        fun getInstance(): UserRepository {
-            return instance ?: UserRepository().also {
+        fun getInstance(): AccountRepository {
+            return instance ?: AccountRepository().also {
                 instance = it
             }
         }
 
         val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-            name = "user_preferences"
+            name = "account_preferences"
         )
 
         val DEFAULT_WALLET = stringPreferencesKey("DEFAULT_WALLET")

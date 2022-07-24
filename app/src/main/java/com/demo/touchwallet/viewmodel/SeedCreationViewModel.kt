@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.demo.touchwallet.repository.SolanaRepository
+import com.demo.touchwallet.repository.WalletRepository
 import com.demo.touchwallet.ui.state.SeedPhraseCreationUiState
 import kotlinx.coroutines.flow.*
 
@@ -18,7 +18,7 @@ class SeedCreationViewModel: ViewModel() {
         private set
 
     fun flowStateOnSeedWords(context: Context): Flow<SeedPhraseCreationUiState?> {
-        return SolanaRepository
+        return WalletRepository
             .getInstance(context = context)
             .flowOnSeed()
             .filterNotNull()

@@ -1,7 +1,6 @@
 package com.demo.touchwallet.ui.composable.wallet
 
 import android.content.pm.ActivityInfo
-import android.os.Bundle
 import android.view.Window
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.navigation.NamedNavArgument
 import com.demo.touchwallet.extensions.ConfigurationExtensions.heightPercentageDP
 import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.extensions.ContextExtensions.activity
@@ -36,12 +34,8 @@ import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.models.TokenModel
-import com.demo.touchwallet.usecase.CreateWalletUseCase
-import com.demo.touchwallet.usecase.RetrieveOrCreateWalletUseCase
-import com.demo.touchwallet.usecase.RetrieveWalletUseCase
 import com.demo.touchwallet.viewmodel.WalletViewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
 
 @Composable
 fun WalletScreen(
@@ -55,16 +49,19 @@ fun WalletScreen(
     )[WalletViewModel::class.java]
 
     val flowOnWallet by rememberUpdatedState(
-        newValue = viewModel.flowOnWallet(context = LocalContext.current)
-    )
-
-    val flowOnTokenList by rememberUpdatedState(
-        newValue = viewModel.flowOnTokenList()
+        newValue = viewModel.flowOnWallet(
+            context = LocalContext.current
+        )
     )
 
     LaunchedEffect(true) {
-        flowOnWallet.collect()
-        flowOnTokenList.collect()
+        flowOnWallet.collect { account ->
+            account?.let {
+                viewModel
+                    .flowOnTokenList(it)
+                    .collect()
+            }
+        }
     }
     
     SystemUi(

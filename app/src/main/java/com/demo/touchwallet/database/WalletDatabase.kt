@@ -16,12 +16,12 @@ import net.sqlcipher.database.SupportFactory
     entities = [KeyPairEntity::class, SeedEntity::class],
     version = 1
 )
-abstract class SolanaDatabase: RoomDatabase() {
+abstract class WalletDatabase: RoomDatabase() {
     abstract fun keyPairDao(): KeyPairDao
     abstract fun seedDao(): SeedDao
 
     companion object {
-        @Volatile private var instance: SolanaDatabase? = null
+        @Volatile private var instance: WalletDatabase? = null
         private val LOCK = Any()
 
         operator fun invoke(context: Context) = instance ?: synchronized(LOCK) {
@@ -30,7 +30,7 @@ abstract class SolanaDatabase: RoomDatabase() {
             }
         }
 
-        private fun buildDatabase(context: Context): SolanaDatabase {
+        private fun buildDatabase(context: Context): WalletDatabase {
             val passphrase: ByteArray = SQLiteDatabase.getBytes("password".toCharArray())
             val factory = SupportFactory(passphrase, object: SQLiteDatabaseHook {
                 override fun preKey(database: SQLiteDatabase?) {}
@@ -38,7 +38,7 @@ abstract class SolanaDatabase: RoomDatabase() {
                 override fun postKey(database: SQLiteDatabase?) {}
             }, false)
 
-            return databaseBuilder(context, SolanaDatabase::class.java, "solana.db")
+            return databaseBuilder(context, WalletDatabase::class.java, "solana.db")
 //                .openHelperFactory(factory)
                 .fallbackToDestructiveMigration()
                 .build()
