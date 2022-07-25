@@ -4,11 +4,10 @@ import android.content.Context
 import com.demo.touchwallet.crypto.Base58Encoder
 import com.demo.touchwallet.crypto.Derivation
 import com.demo.touchwallet.repository.WalletRepository
-import com.demo.touchwallet.ui.models.SolanaAccountModel
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 
 object DeriveAccountsUseCase {
-    suspend fun deriveAccounts(context: Context): List<SolanaAccountModel>? {
+    suspend fun deriveAccounts(context: Context): List<String>? {
         val walletRepository = WalletRepository
             .getInstance(context = context)
 
@@ -18,12 +17,8 @@ object DeriveAccountsUseCase {
             Derivation.invoke(
                 seed = seed.seed
             ).map {
-                val pubKey = Base58Encoder.invoke(
+                Base58Encoder.invoke(
                     (it.public as Ed25519PublicKeyParameters).encoded
-                )
-
-                GetAccountBalanceUseCase.getAccountBalance(
-                    pubKey = pubKey, context = context
                 )
             }
         } else null

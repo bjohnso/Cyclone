@@ -3,27 +3,38 @@ package com.demo.touchwallet.crypto
 import android.content.Context
 import com.demo.touchwallet.R
 import com.demo.touchwallet.extensions.ByteExtensions.toBinaryString
+import com.demo.touchwallet.extensions.StringExtensions.decodeBinaryString
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.*
 
 object MnemonicEncoder {
-    operator fun invoke(context: Context, seed: ByteArray): List<String> {
+    operator fun invoke(context: Context, seed: ByteArray): List<String>? {
         val mnemonicWordList = context.resources.getStringArray(R.array.mnemonic_word_list)
 
         val checksumLength = seed.size / 4
-        val hashedSeed = hashEntropy(seed)
+        val entropyLength = seed.size * 8
+
+        val entropyBinaryString = BitSet
+            .valueOf(seed)
+            .toBinaryString(0)
+            ?.padStart(entropyLength, '0') ?: ""
+
+        val hashedSeed = hashEntropy(
+            entropyBinaryString.decodeBinaryString()
+        )
 
         val hashedSeedBits = BitSet.valueOf(hashedSeed)
-        val entropyBits = BitSet.valueOf(seed)
 
-        var mnemonicBinaryString = ""
+        val mnemonicBinaryString = "$entropyBinaryString${
+            hashedSeedBits.toBinaryString(
+                hashedSeedBits.length() - checksumLength
+            )
+        }"
 
-        mnemonicBinaryString += entropyBits.toBinaryString(0)
-
-        mnemonicBinaryString += hashedSeedBits.toBinaryString(
-            hashedSeedBits.length() - checksumLength
-        )
+        if (mnemonicBinaryString.length != entropyLength + checksumLength) {
+            return null
+        }
 
         return mnemonicBinaryString
             .chunked(11)

@@ -2,6 +2,7 @@ package com.demo.touchwallet.ui.composable.wallet
 
 import android.content.pm.ActivityInfo
 import android.view.Window
+import android.widget.Spinner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,6 +33,7 @@ import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
+import com.demo.touchwallet.ui.composable.shared.Spinner
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.models.TokenModel
 import com.demo.touchwallet.viewmodel.WalletViewModel
@@ -43,6 +45,7 @@ fun WalletScreen(
     navigatorInterface: NavigatorInterface? = null
 ) {
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
 
     val viewModel = ViewModelProvider(
         LocalContext.current.activity() as ViewModelStoreOwner
@@ -50,16 +53,17 @@ fun WalletScreen(
 
     val flowOnWallet by rememberUpdatedState(
         newValue = viewModel.flowOnWallet(
-            context = LocalContext.current
+            context = context
         )
     )
 
     LaunchedEffect(true) {
         flowOnWallet.collect { account ->
             account?.let {
-                viewModel
-                    .flowOnTokenList(it)
-                    .collect()
+                viewModel.flowOnTokenList(
+                    context = context,
+                    accountModel = it
+                ).collect()
             }
         }
     }
@@ -93,12 +97,15 @@ fun WalletScreen(
             verticalArrangement = Arrangement.Top
         ) {
             WalletAddressTitle(viewModel.uiState.currentAddress ?: "")
+
             Spacer(
                 modifier = Modifier.padding(
                     top = configuration.heightPercentageDP(5f)
                 )
             )
+
             WalletTotalBalance(viewModel.uiState.currentTotalBalance)
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -112,14 +119,20 @@ fun WalletScreen(
                 WalletActionButton(text = "Deposit")
                 WalletActionButton(text = "Send")
             }
+
             Spacer(
                 modifier = Modifier.padding(
                     top = configuration.heightPercentageDP(5f)
                 )
             )
-            TokenList(
-                tokenList = viewModel.uiState.tokens ?: listOf()
-            )
+
+            if (viewModel.uiState.isLoading) {
+                Spinner()
+            } else {
+                TokenList(
+                    tokenList = viewModel.uiState.tokens ?: listOf()
+                )
+            }
         }
     }
 }

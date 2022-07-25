@@ -32,6 +32,7 @@ import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
+import com.demo.touchwallet.ui.composable.shared.Spinner
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.usecase.CreateWalletUseCase
 import com.demo.touchwallet.viewmodel.SeedCreationViewModel
@@ -208,16 +209,5 @@ private fun OKButton(navigatorInterface: NavigatorInterface? = null) {
                 fontWeight = FontWeight.Bold
             ),
         )
-    }
-}
-
-@Composable
-private fun Spinner() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator()
     }
 }

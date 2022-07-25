@@ -21,9 +21,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "CMC_API_KEY", cmc_api_key
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "CMC_API_KEY", cmc_api_key
         }
     }
     compileOptions {

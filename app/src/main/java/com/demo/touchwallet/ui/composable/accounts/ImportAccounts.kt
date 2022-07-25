@@ -29,6 +29,7 @@ import com.demo.touchwallet.extensions.ConfigurationExtensions.widthPercentageDP
 import com.demo.touchwallet.extensions.ContextExtensions.activity
 import com.demo.touchwallet.interfaces.NavigatorInterface
 import com.demo.touchwallet.ui.composable.shared.LockScreenOrientation
+import com.demo.touchwallet.ui.composable.shared.Spinner
 import com.demo.touchwallet.ui.composable.shared.SystemUi
 import com.demo.touchwallet.ui.models.SolanaAccountModel
 import com.demo.touchwallet.viewmodel.ImportAccountsViewModel
@@ -83,9 +84,12 @@ fun ImportAccountScreen(window: Window, navigatorInterface: NavigatorInterface? 
         ) {
             Title()
             SubTitle()
+
             if (viewModel.uiState.isLoading) {
                 Spinner()
-            } else if (viewModel.uiState.accounts != null) {
+            }
+
+            if (viewModel.uiState.accounts != null) {
                 AccountList(viewModel.uiState.accounts ?: listOf())
                 ImportButton()
             }
@@ -225,16 +229,5 @@ private fun ImportButton(navigatorInterface: NavigatorInterface? = null) {
                 fontWeight = FontWeight.Bold
             ),
         )
-    }
-}
-
-@Composable
-private fun Spinner() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator()
     }
 }

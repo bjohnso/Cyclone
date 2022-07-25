@@ -13,6 +13,15 @@ object Derivation {
     operator fun invoke(seed: ByteArray): List<AsymmetricCipherKeyPair> {
         // path = m/44'/501'
 
+        val entropyLength = seed.size * 8
+
+        val entropyBinaryString = BitSet
+            .valueOf(seed)
+            .toBinaryString(0)
+            ?.padStart(entropyLength, '0') ?: ""
+
+        val entropy = entropyBinaryString.decodeBinaryString()
+
         val keyPairs = mutableListOf<AsymmetricCipherKeyPair>()
 
         val indices = List(66) {
@@ -25,7 +34,7 @@ object Derivation {
 
         var hmac = BitSet.valueOf(
             hashSeed(
-                seed = seed,
+                seed = entropy,
                 salt = "mnemonic".toByteArray()
             )
         )

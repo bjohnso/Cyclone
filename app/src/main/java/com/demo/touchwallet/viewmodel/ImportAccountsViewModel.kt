@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.demo.touchwallet.ui.state.ImportAccountsUiState
 import com.demo.touchwallet.ui.models.SolanaAccountModel
 import com.demo.touchwallet.usecase.DeriveAccountsUseCase
+import com.demo.touchwallet.usecase.GetAccountBalanceUseCase
 import kotlinx.coroutines.flow.*
 
 class ImportAccountsViewModel: ViewModel() {
@@ -18,19 +19,35 @@ class ImportAccountsViewModel: ViewModel() {
     )
         private set
 
-    fun flowOnDerive(context: Context): Flow<List<SolanaAccountModel>?> {
+    fun flowOnDerive(context: Context): Flow<SolanaAccountModel?> {
         return flow {
-            emit(DeriveAccountsUseCase.deriveAccounts(context = context))
+            val pubKeys = DeriveAccountsUseCase.deriveAccounts(
+                context = context
+            )
+
+            pubKeys?.forEach {
+                emit(
+                    GetAccountBalanceUseCase.getAccountBalance(
+                        context = context, pubKey = it
+                    )
+                )
+            }
+
+            uiState = uiState.copy(
+                isLoading = false,
+                hasError = false,
+            )
         }.distinctUntilChanged()
             .onEach { onDeriveAddresses(it) }
     }
 
-    private fun onDeriveAddresses(accounts: List<SolanaAccountModel>?) {
-        if (!accounts.isNullOrEmpty()) {
+    private fun onDeriveAddresses(account: SolanaAccountModel?) {
+        if (account != null) {
+            val accounts = (uiState.accounts ?: listOf()) + listOf(account)
             uiState = uiState.copy(
                 isLoading = false,
                 hasError = false,
-                accounts = accounts
+                accounts = accounts.distinctBy { it.publicKey }
             )
         }
     }

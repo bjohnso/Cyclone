@@ -33,8 +33,8 @@ class WalletViewModel: ViewModel() {
             emit(
                 if (keyPair?.publicKey != null) {
                     GetAccountBalanceUseCase.getAccountBalance(
+                        context = context,
                         pubKey = keyPair.publicKey,
-                        context = context
                     )
                 } else null
             )
@@ -42,7 +42,7 @@ class WalletViewModel: ViewModel() {
             .onEach { onWallet(it) }
     }
 
-    fun flowOnTokenList(accountModel: SolanaAccountModel): Flow<List<TokenModel>> {
+    fun flowOnTokenList(context: Context, accountModel: SolanaAccountModel): Flow<List<TokenModel>> {
         return flow {
             emit(
                 listOf(
@@ -56,7 +56,12 @@ class WalletViewModel: ViewModel() {
             )
         }.filterNotNull()
             .distinctUntilChanged()
-            .onEach { onTokenList(it) }
+            .onEach {
+                onTokenList(
+                    context = context,
+                    tokens = it
+                )
+            }
     }
 
     private fun onWallet(solanaAccount: SolanaAccountModel?) {
@@ -65,13 +70,21 @@ class WalletViewModel: ViewModel() {
         }
     }
 
-    private fun onTokenList(tokens: List<TokenModel>) {
+    private suspend fun onTokenList(context: Context, tokens: List<TokenModel>) {
+        val quote = GetAccountBalanceUseCase.getUSDQuote(
+            context = context,
+            symbol = "SOL",
+            slug = "solana",
+        ) ?: 0f
+
+        val solanaBalance = tokens.find {
+            it.tokenSymbol == "SOL"
+        }?.tokenBalance ?: 0f
+
         uiState = uiState.copy(
             isLoading = false,
             hasError = false,
-//            currentTotalBalance = tokens
-//                .map { t -> t.tokenBalance }
-//                .reduceOrNull { acc, next -> acc + next } ?: 0f,
+            currentTotalBalance = quote * solanaBalance,
             tokens = tokens
         )
     }

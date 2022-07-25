@@ -23,8 +23,7 @@ object MnemonicDecoder {
                     val decimal = mnemonicWordList.indexOf(it)
                     require(decimal > -1)
 
-                    val binaryString = Integer
-                        .toBinaryString(decimal)
+                    val binaryString = decimal.toString(2)
                         .padStart(11, '0')
 
                     mnemonicBinaryString += binaryString

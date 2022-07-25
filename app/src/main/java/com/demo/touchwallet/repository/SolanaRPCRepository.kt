@@ -1,7 +1,7 @@
 package com.demo.touchwallet.repository
 
 import android.content.Context
-import com.demo.touchwallet.api.ApiFactory
+import com.demo.touchwallet.api.factory.SolanaRPCApiFactory
 import com.demo.touchwallet.api.requestdto.RPCGetBalanceRequestDTO
 import com.demo.touchwallet.extensions.ExceptionExtensions
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 class SolanaRPCRepository {
     suspend fun getBalance(pubKey: String, context: Context) = withContext(Dispatchers.IO) {
         return@withContext ExceptionExtensions.tryOrDefaultAsync(null) {
-            return@tryOrDefaultAsync ApiFactory
+            return@tryOrDefaultAsync SolanaRPCApiFactory
                 .getApiClient(context = context)
                 .getBalance(
                     RPCGetBalanceRequestDTO(params = listOf(pubKey))

@@ -21,7 +21,7 @@ data class SeedEntity(
     )
     val seed: ByteArray,
 ) {
-    fun getMnemonic(context: Context): List<String> {
+    fun getMnemonic(context: Context): List<String>? {
         return MnemonicEncoder.invoke(context, seed)
     }
 
