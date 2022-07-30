@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TouchWallet</string>
+    <string name="app_name">Cyclone</string>
     <string-array name="mnemonic_word_list">
         <item>abandon</item>
         <item>ability</item>
