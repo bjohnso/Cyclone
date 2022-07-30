@@ -31,9 +31,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.demo.cyclone.R
 import com.demo.cyclone.extensions.ConfigurationExtensions.heightPercentageDP
 import com.demo.cyclone.extensions.ConfigurationExtensions.widthPercentageDP
+import com.demo.cyclone.extensions.ContextExtensions.activity
 import com.demo.cyclone.interfaces.NavigatorInterface
 import com.demo.cyclone.ui.composable.shared.LockScreenOrientation
 import com.demo.cyclone.ui.composable.shared.SystemUi
@@ -41,6 +44,9 @@ import com.demo.cyclone.ui.models.AddressListModel
 import com.demo.cyclone.ui.models.AddressModel
 import com.demo.cyclone.ui.models.HeaderModel
 import com.demo.cyclone.ui.navigation.Screen
+import com.demo.cyclone.usecase.CreateTransactionUseCase
+import com.demo.cyclone.viewmodel.TransactionSelectAddressViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TransactionSelectAddress(
@@ -50,26 +56,11 @@ fun TransactionSelectAddress(
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
 
-//    val viewModel = ViewModelProvider(
-//        LocalContext.current.activity() as ViewModelStoreOwner
-//    )[WalletViewModel::class.java]
-//
-//    val flowOnWallet by rememberUpdatedState(
-//        newValue = viewModel.flowOnWallet(
-//            context = context
-//        )
-//    )
-//
-//    LaunchedEffect(true) {
-//        flowOnWallet.collect { account ->
-//            account?.let {
-//                viewModel.flowOnTokenList(
-//                    context = context,
-//                    accountModel = it
-//                ).collect()
-//            }
-//        }
-//    }
+    val coroutine = rememberCoroutineScope()
+
+    val viewModel = ViewModelProvider(
+        LocalContext.current.activity() as ViewModelStoreOwner
+    )[TransactionSelectAddressViewModel::class.java]
 
     SystemUi(
         window = window,
@@ -151,7 +142,9 @@ fun TransactionSelectAddress(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Top
             ) {
-                AddressInputField()
+                AddressInputField { address ->
+                    viewModel.uiState.recipientAddress = address
+                }
 
                 Spacer(modifier = Modifier.padding(bottom = 5.dp))
 
@@ -199,7 +192,14 @@ fun TransactionSelectAddress(
                     testAddressBookList
                 ))
 
-                NextButton()
+                NextButton {
+                    coroutine.launch {
+                        val success = CreateTransactionUseCase.createTransaction(
+                            context = context,
+                            viewModel.uiState.recipientAddress
+                        )
+                    }
+                }
             }
         }
     }
@@ -417,7 +417,7 @@ fun AddressItem(address: AddressModel) {
 }
 
 @Composable
-fun AddressInputField() {
+fun AddressInputField(onAddressChanged: (String) -> Unit) {
     val configuration = LocalConfiguration.current
 
     var text by remember {
@@ -477,6 +477,7 @@ fun AddressInputField() {
                 ),
                 onValueChange = {
                     text = it
+                    onAddressChanged(it)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -487,12 +488,12 @@ fun AddressInputField() {
 }
 
 @Composable
-private fun NextButton(navigatorInterface: NavigatorInterface? = null) {
+private fun NextButton(onClick: () -> Unit) {
     val configuration = LocalConfiguration.current
 
     Button(
         onClick = {
-            navigatorInterface?.navigate(Screen.SeedPhraseCreationScreen.route)
+            onClick.invoke()
         },
         modifier = Modifier
             .padding(

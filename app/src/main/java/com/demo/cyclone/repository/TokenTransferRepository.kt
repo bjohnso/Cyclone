@@ -4,11 +4,13 @@ import android.content.Context
 import com.demo.cyclone.database.CycloneDatabase
 import com.demo.cyclone.entity.TokenTransferEntity
 import com.demo.cyclone.extensions.ContextExtensions.touchWalletApplication
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class TokenTransferRepository(context: Context) {
     private var db = CycloneDatabase(context.touchWalletApplication())
 
-    suspend fun newTokenTransfer(recipient: String, sender: String): TokenTransferEntity? {
+    suspend fun newTokenTransfer(recipient: String, sender: String) = withContext(Dispatchers.IO) {
         val tokenTransfer = TokenTransferEntity(
             recipient = recipient,
             sender = sender,
@@ -16,7 +18,7 @@ class TokenTransferRepository(context: Context) {
         )
 
         db.tokenTransferDao().persistTokenTransfer(tokenTransfer)
-        return tokenTransfer
+        return@withContext tokenTransfer
     }
 
     companion object {
