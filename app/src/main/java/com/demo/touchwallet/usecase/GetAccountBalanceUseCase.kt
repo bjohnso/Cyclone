@@ -18,7 +18,7 @@ object GetAccountBalanceUseCase {
 
         return SolanaAccountModel(
             publicKey = pubKey,
-            balance = balance?.result?.value ?: 0f
+            lamports = balance?.result?.value ?: 0f
         )
     }
 

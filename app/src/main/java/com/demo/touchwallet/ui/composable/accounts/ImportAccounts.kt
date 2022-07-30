@@ -196,7 +196,7 @@ fun AccountItem(account: SolanaAccountModel) {
         Spacer(modifier = Modifier.width(50.dp))
             
         Text(
-            text = "${account.balance} SOL",
+            text = "${account.solanaBalance} SOL",
             textAlign = TextAlign.Start,
             style = TextStyle(fontSize = 18.sp, color = Color("#A5A5A5".toColorInt())),
         )

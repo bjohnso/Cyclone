@@ -49,7 +49,7 @@ class WalletViewModel: ViewModel() {
                     TokenModel(
                         tokenName = "Solana",
                         tokenSymbol = "SOL",
-                        accountModel.balance,
+                        accountModel.solanaBalance,
                         R.drawable.ic_sol
                     )
                 )
