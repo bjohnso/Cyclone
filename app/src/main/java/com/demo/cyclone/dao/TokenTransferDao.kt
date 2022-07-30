@@ -1,17 +1,17 @@
 package com.demo.cyclone.dao
 
 import androidx.room.*
-import com.demo.cyclone.entity.SeedEntity
 import com.demo.cyclone.entity.TokenTransferEntity
 
+@Dao
 interface TokenTransferDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun persistTokenTransfer(vararg tokenTransfer: TokenTransferEntity)
 
     @Transaction
-    @Query("select * from tbl_token_transfers limit 1")
-    fun retrieveLatestTokenTransfer(): SeedEntity?
+    @Query("select * from tbl_token_transfers order by createdAt desc limit 1")
+    fun retrieveLatestTokenTransfer(): TokenTransferEntity?
 
     @Transaction
     @Query("select * from tbl_token_transfers where recipient = :recipient")

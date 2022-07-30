@@ -35,6 +35,7 @@ import com.demo.cyclone.ui.composable.shared.LockScreenOrientation
 import com.demo.cyclone.ui.composable.shared.Spinner
 import com.demo.cyclone.ui.composable.shared.SystemUi
 import com.demo.cyclone.ui.models.TokenModel
+import com.demo.cyclone.ui.navigation.Screen
 import com.demo.cyclone.viewmodel.WalletViewModel
 import kotlinx.coroutines.flow.collect
 
@@ -115,8 +116,12 @@ fun WalletScreen(
                     )
                     .fillMaxWidth()
             ) {
-                WalletActionButton(text = "Deposit")
-                WalletActionButton(text = "Send")
+                WalletActionButton(text = "Deposit") {
+
+                }
+                WalletActionButton(text = "Send") {
+                    navigatorInterface?.navigate(Screen.TransactionSelectAddress.route)
+                }
             }
 
             Spacer(
@@ -276,12 +281,12 @@ fun WalletTotalBalance(totalWalletBalance: Float) {
 }
 
 @Composable
-private fun RowScope.WalletActionButton(text: String, navigatorInterface: NavigatorInterface? = null) {
+private fun RowScope.WalletActionButton(text: String, onClick:() -> Unit) {
     val configuration = LocalConfiguration.current
 
     Button(
         onClick = {
-
+            onClick.invoke()
         },
         modifier = Modifier
             .padding(

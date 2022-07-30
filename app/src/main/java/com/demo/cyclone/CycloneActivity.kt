@@ -23,6 +23,11 @@ import com.demo.cyclone.ui.composable.wallet.WalletCreateScreen
 import com.demo.cyclone.ui.composable.wallet.WalletScreen
 import com.demo.cyclone.ui.navigation.Screen
 import com.demo.cyclone.ui.theme.TouchWalletTheme
+import com.demo.cyclone.usecase.RetrieveSeedUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class CycloneActivity : ComponentActivity(), NavigatorInterface {
 
@@ -39,7 +44,7 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.TransactionSelectAddress.route
+                        startDestination = Screen.SplashScreen.route
                     ) {
                         composable(route = Screen.SplashScreen.route) {
                             SplashScreen(
@@ -95,26 +100,26 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
     }
 
     private fun onStartUp() {
-//        CoroutineScope(Dispatchers.Main).launch {
-//            val seed = RetrieveSeedUseCase
-//                .retrieveCurrentSeed(this@TouchActivity)
-//
-//            delay(1000)
-//
-//            val route = when (seed?.seed) {
-//                null -> Screen.WalletCreateScreen.route
-//                else -> Screen.WalletScreen.route
-//            }
-//
-//            val navOptions = NavOptions
-//                .Builder()
-//                .setPopUpTo(
-//                    route = Screen.SplashScreen.route,
-//                    inclusive = true
-//                ).build()
-//
-//            navController.navigate(route, navOptions)
-//        }
+        CoroutineScope(Dispatchers.Main).launch {
+            val seed = RetrieveSeedUseCase
+                .retrieveCurrentSeed(this@CycloneActivity)
+
+            delay(1000)
+
+            val route = when (seed?.seed) {
+                null -> Screen.WalletCreateScreen.route
+                else -> Screen.WalletScreen.route
+            }
+
+            val navOptions = NavOptions
+                .Builder()
+                .setPopUpTo(
+                    route = Screen.SplashScreen.route,
+                    inclusive = true
+                ).build()
+
+            navController.navigate(route, navOptions)
+        }
     }
 
     override fun navigateUp() {

@@ -5,7 +5,9 @@ import androidx.room.Database
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import com.demo.cyclone.dao.KeyPairDao
+import com.demo.cyclone.dao.SavedAddressDao
 import com.demo.cyclone.dao.SeedDao
+import com.demo.cyclone.dao.TokenTransferDao
 import com.demo.cyclone.entity.KeyPairEntity
 import com.demo.cyclone.entity.SavedAddressEntity
 import com.demo.cyclone.entity.SeedEntity
@@ -26,6 +28,8 @@ import net.sqlcipher.database.SupportFactory
 abstract class CycloneDatabase: RoomDatabase() {
     abstract fun keyPairDao(): KeyPairDao
     abstract fun seedDao(): SeedDao
+    abstract fun savedAddressDao(): SavedAddressDao
+    abstract fun tokenTransferDao(): TokenTransferDao
 
     companion object {
         @Volatile private var instance: CycloneDatabase? = null

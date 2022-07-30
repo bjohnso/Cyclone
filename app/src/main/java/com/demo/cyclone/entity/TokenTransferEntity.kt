@@ -9,5 +9,9 @@ data class TokenTransferEntity(
     val id: Int = 0,
     val recipient: String,
     val sender: String,
-    val timestamp: Long
+    val createdAt: Long,
+    val lamports: Float? = 0f,
+    val status: String? = null,
+    val signedAt: Long? = 0,
+    val sentAt: Long? = 0,
 )

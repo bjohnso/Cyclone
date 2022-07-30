@@ -3,13 +3,14 @@ package com.demo.cyclone.dao
 import androidx.room.*
 import com.demo.cyclone.entity.SavedAddressEntity
 
+@Dao
 interface SavedAddressDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun persistSavedAddress(vararg savedAddress: SavedAddressEntity)
 
     @Transaction
-    @Query("select * from tbl_token_transfers")
+    @Query("select * from tbl_saved_addresses")
     fun retrieveAllSavedAddresses(): List<SavedAddressEntity?>
 
     @Transaction
@@ -18,9 +19,9 @@ interface SavedAddressDao {
 
     @Transaction
     @Delete
-    fun destroyTokenTransfers(vararg savedAddress: SavedAddressEntity)
+    fun destroySavedAddresses(vararg savedAddress: SavedAddressEntity)
 
     @Transaction
     @Query("delete from tbl_saved_addresses")
-    fun destroyAllTokenTransfers()
+    fun destroyAllSavedAddresses()
 }
