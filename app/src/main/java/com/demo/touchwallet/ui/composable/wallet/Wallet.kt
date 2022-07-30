@@ -2,7 +2,6 @@ package com.demo.touchwallet.ui.composable.wallet
 
 import android.content.pm.ActivityInfo
 import android.view.Window
-import android.widget.Spinner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

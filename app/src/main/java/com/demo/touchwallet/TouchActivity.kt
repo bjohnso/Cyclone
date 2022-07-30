@@ -18,6 +18,7 @@ import com.demo.touchwallet.ui.composable.accounts.ImportAccountScreen
 import com.demo.touchwallet.ui.composable.seedphrase.SeedCreationScreen
 import com.demo.touchwallet.ui.composable.seedphrase.SeedPhraseRecoveryScreen
 import com.demo.touchwallet.ui.composable.startup.SplashScreen
+import com.demo.touchwallet.ui.composable.transaction.TransactionSelectAddress
 import com.demo.touchwallet.ui.composable.wallet.WalletCreateScreen
 import com.demo.touchwallet.ui.composable.wallet.WalletScreen
 import com.demo.touchwallet.ui.navigation.Screen
@@ -45,7 +46,7 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.SplashScreen.route
+                        startDestination = Screen.TransactionSelectAddress.route
                     ) {
                         composable(route = Screen.SplashScreen.route) {
                             SplashScreen(
@@ -64,6 +65,12 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
                             arguments = Screen.WalletScreen.arguments ?: listOf()
                         ) {
                             WalletScreen(
+                                window = window,
+                                navigatorInterface = this@TouchActivity
+                            )
+                        }
+                        composable(route = Screen.TransactionSelectAddress.route) {
+                            TransactionSelectAddress(
                                 window = window,
                                 navigatorInterface = this@TouchActivity
                             )
@@ -95,26 +102,26 @@ class TouchActivity : ComponentActivity(), NavigatorInterface {
     }
 
     private fun onStartUp() {
-        CoroutineScope(Dispatchers.Main).launch {
-            val seed = RetrieveSeedUseCase
-                .retrieveCurrentSeed(this@TouchActivity)
-
-            delay(1000)
-
-            val route = when (seed?.seed) {
-                null -> Screen.WalletCreateScreen.route
-                else -> Screen.WalletScreen.route
-            }
-
-            val navOptions = NavOptions
-                .Builder()
-                .setPopUpTo(
-                    route = Screen.SplashScreen.route,
-                    inclusive = true
-                ).build()
-
-            navController.navigate(route, navOptions)
-        }
+//        CoroutineScope(Dispatchers.Main).launch {
+//            val seed = RetrieveSeedUseCase
+//                .retrieveCurrentSeed(this@TouchActivity)
+//
+//            delay(1000)
+//
+//            val route = when (seed?.seed) {
+//                null -> Screen.WalletCreateScreen.route
+//                else -> Screen.WalletScreen.route
+//            }
+//
+//            val navOptions = NavOptions
+//                .Builder()
+//                .setPopUpTo(
+//                    route = Screen.SplashScreen.route,
+//                    inclusive = true
+//                ).build()
+//
+//            navController.navigate(route, navOptions)
+//        }
     }
 
     override fun navigateUp() {
