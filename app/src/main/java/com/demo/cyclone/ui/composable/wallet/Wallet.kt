@@ -120,7 +120,7 @@ fun WalletScreen(
 
                 }
                 WalletActionButton(text = "Send") {
-                    navigatorInterface?.navigate(Screen.TransactionSelectAddress.route)
+                    navigatorInterface?.navigate(Screen.TransactionSelectAddressScreen.route)
                 }
             }
 

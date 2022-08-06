@@ -21,4 +21,8 @@ object StringExtensions {
             }
         }.toByteArray()
     }
+
+    fun Char.isDecimal(): Boolean {
+        return "[0-9]".toRegex().find(this.toString()) != null
+    }
 }

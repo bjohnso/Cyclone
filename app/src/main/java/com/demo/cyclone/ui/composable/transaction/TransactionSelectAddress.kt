@@ -70,57 +70,7 @@ fun TransactionSelectAddress(
 
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
-    Scaffold(topBar = {
-        TopAppBar(
-            backgroundColor = Color("#222222".toColorInt()),
-            contentColor = Color.White,
-            elevation = 12.dp
-        ) {
-            IconButton(onClick = {}) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_back_arrow),
-                    contentDescription = ""
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(start = 5.dp))
-
-            Text(
-                text = "Send SOL",
-                textAlign = TextAlign.Start,
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                ),
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(
-                        start = configuration.widthPercentageDP(5f),
-                        end = configuration.widthPercentageDP(5f),
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                ClickableText(
-                    text = AnnotatedString(
-                        text = "NEXT"
-                    ),
-                    style = TextStyle(
-                        textAlign = TextAlign.Start,
-                        fontSize = 18.sp,
-                        color = Color("#707070".toColorInt()),
-                        fontWeight = FontWeight.Bold
-                    ),
-                    onClick = {}
-                )
-            }
-        }
-    }) {
+    Scaffold(topBar = { SelectAddressAppBar() }) {
         Box(
             modifier = Modifier
                 .padding(it)
@@ -201,6 +151,61 @@ fun TransactionSelectAddress(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SelectAddressAppBar() {
+    val configuration = LocalConfiguration.current
+
+    TopAppBar(
+        backgroundColor = Color("#222222".toColorInt()),
+        contentColor = Color.White,
+        elevation = 12.dp
+    ) {
+        IconButton(onClick = {}) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_back_arrow),
+                contentDescription = ""
+            )
+        }
+
+        Spacer(modifier = Modifier.padding(start = 5.dp))
+
+        Text(
+            text = "Send SOL",
+            textAlign = TextAlign.Start,
+            style = TextStyle(
+                fontSize = 18.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            ),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(
+                    start = configuration.widthPercentageDP(5f),
+                    end = configuration.widthPercentageDP(5f),
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            ClickableText(
+                text = AnnotatedString(
+                    text = "Next"
+                ),
+                style = TextStyle(
+                    textAlign = TextAlign.Start,
+                    fontSize = 18.sp,
+                    color = Color("#707070".toColorInt()),
+                    fontWeight = FontWeight.Bold
+                ),
+                onClick = {}
+            )
         }
     }
 }

@@ -19,6 +19,7 @@ import com.demo.cyclone.ui.composable.seedphrase.SeedCreationScreen
 import com.demo.cyclone.ui.composable.seedphrase.SeedPhraseRecoveryScreen
 import com.demo.cyclone.ui.composable.startup.SplashScreen
 import com.demo.cyclone.ui.composable.transaction.TransactionSelectAddress
+import com.demo.cyclone.ui.composable.transaction.TransactionSelectAmountScreen
 import com.demo.cyclone.ui.composable.wallet.WalletCreateScreen
 import com.demo.cyclone.ui.composable.wallet.WalletScreen
 import com.demo.cyclone.ui.navigation.Screen
@@ -44,7 +45,7 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.SplashScreen.route
+                        startDestination = Screen.TransactionSelectAmountScreen.route
                     ) {
                         composable(route = Screen.SplashScreen.route) {
                             SplashScreen(
@@ -67,8 +68,14 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                                 navigatorInterface = this@CycloneActivity
                             )
                         }
-                        composable(route = Screen.TransactionSelectAddress.route) {
+                        composable(route = Screen.TransactionSelectAddressScreen.route) {
                             TransactionSelectAddress(
+                                window = window,
+                                navigatorInterface = this@CycloneActivity
+                            )
+                        }
+                        composable(route = Screen.TransactionSelectAmountScreen.route) {
+                            TransactionSelectAmountScreen(
                                 window = window,
                                 navigatorInterface = this@CycloneActivity
                             )
@@ -95,7 +102,7 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                 }
             }
 
-            onStartUp()
+//            onStartUp()
         }
     }
 
