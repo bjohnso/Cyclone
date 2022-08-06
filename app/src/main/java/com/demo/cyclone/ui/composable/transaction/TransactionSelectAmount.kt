@@ -1,7 +1,9 @@
 package com.demo.cyclone.ui.composable.transaction
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.Window
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -38,13 +40,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.demo.cyclone.R
 import com.demo.cyclone.extensions.ConfigurationExtensions.heightPercentageDP
+import com.demo.cyclone.extensions.ConfigurationExtensions.heightPercentageSP
 import com.demo.cyclone.extensions.ConfigurationExtensions.widthPercentageDP
+import com.demo.cyclone.extensions.ConfigurationExtensions.widthPercentageSP
 import com.demo.cyclone.extensions.ContextExtensions.activity
 import com.demo.cyclone.extensions.StringExtensions.isDecimal
 import com.demo.cyclone.interfaces.NavigatorInterface
 import com.demo.cyclone.ui.composable.shared.LockScreenOrientation
 import com.demo.cyclone.ui.composable.shared.SystemUi
 import com.demo.cyclone.viewmodel.TransactionSelectAddressViewModel
+import com.demo.cyclone.viewmodel.TransactionSelectAmountViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,7 +65,11 @@ fun TransactionSelectAmountScreen(
 
     val viewModel = ViewModelProvider(
         LocalContext.current.activity() as ViewModelStoreOwner
-    )[TransactionSelectAddressViewModel::class.java]
+    )[TransactionSelectAmountViewModel::class.java]
+
+    LaunchedEffect(true) {
+        viewModel.getUSDQuote(context)
+    }
 
     SystemUi(
         window = window,
@@ -92,7 +102,7 @@ fun TransactionSelectAmountScreen(
                 verticalArrangement = Arrangement.Top
             ) {
                 AddressInputFieldSelectAmount { address ->
-                    viewModel.uiState.recipientAddress = address
+//                    viewModel.uiState.recipientAddress = address
                 }
 
                 Divider(
@@ -102,7 +112,14 @@ fun TransactionSelectAmountScreen(
 
                 Spacer(modifier = Modifier.padding(bottom = 5.dp))
 
-                AmountInputField()
+                AmountInputField(
+                    viewModel.uiState.tokenAmount.toInt(),
+                    viewModel.getDisplayTokenAmount(),
+                    viewModel.getDisplayUsdAmount(),
+
+                ) { amount ->
+                    viewModel.updateTokenAmount(amount)
+                }
 
                 Spacer(modifier = Modifier.padding(bottom = 5.dp))
 
@@ -235,7 +252,7 @@ fun ColumnScope.BalancePreview() {
                 modifier = Modifier.align(Alignment.CenterVertically),
                 text = "Max",
                 style = TextStyle(
-                    fontSize = 18.sp,
+                    fontSize = configuration.heightPercentageSP(5f),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
@@ -247,16 +264,25 @@ fun ColumnScope.BalancePreview() {
 }
 
 @Composable
-fun ColumnScope.AmountInputField() {
+fun ColumnScope.AmountInputField(
+    key: Int,
+    tokenAmount: String,
+    usdAmount: String,
+    onAmountChange: (amount: String) -> Unit
+) {
     val configuration = LocalConfiguration.current
 
-    var text by remember {
-        mutableStateOf(TextFieldValue(""))
+    var tokenText by remember(true) {
+        mutableStateOf(TextFieldValue(tokenAmount))
     }
 
-    val scroll = rememberScrollState(0)
+    val usdText by remember(key) {
+        mutableStateOf(TextFieldValue(usdAmount))
+    }
 
-    val coroutine = rememberCoroutineScope()
+    val scroll by remember(true) {
+        mutableStateOf(ScrollState(0))
+    }
 
     Box(modifier = Modifier.weight(3f)) {
         Row(modifier = Modifier
@@ -282,13 +308,13 @@ fun ColumnScope.AmountInputField() {
                     BasicTextField(
                         enabled = true,
                         readOnly = false,
-                        value = text,
+                        value = tokenText,
                         cursorBrush = SolidColor(Color.White),
                         textStyle = TextStyle(
                             fontSize = when {
-                                text.text.length > 9 -> 16.sp
-                                text.text.length > 6 -> 24.sp
-                                text.text.length > 3 -> 32.sp
+                                tokenText.text.length > 9 -> 16.sp
+                                tokenText.text.length > 6 -> 24.sp
+                                tokenText.text.length > 3 -> 32.sp
                                 else -> 52.sp
                             },
                             color = Color.White,
@@ -303,14 +329,14 @@ fun ColumnScope.AmountInputField() {
                         ),
                         decorationBox = { innerTextField ->
                             Row {
-                                if (text.text.isEmpty()) {
+                                if (tokenText.text.isEmpty()) {
                                     Text(
                                         text = "0",
                                         style = TextStyle(
                                             fontSize = when {
-                                                text.text.length > 9 -> 16.sp
-                                                text.text.length > 6 -> 24.sp
-                                                text.text.length > 3 -> 32.sp
+                                                tokenText.text.length > 9 -> 16.sp
+                                                tokenText.text.length > 6 -> 24.sp
+                                                tokenText.text.length > 3 -> 32.sp
                                                 else -> 52.sp
                                             },
                                             color = Color("#A5A5A5".toColorInt()),
@@ -345,14 +371,13 @@ fun ColumnScope.AmountInputField() {
                                     newText += newChars
                             }
 
-                            text = TextFieldValue(
+                            tokenText = TextFieldValue(
                                 text = newText,
                                 selection = TextRange(newText.length)
                             )
 
-                            coroutine.launch {
-                                scroll.scrollTo(scroll.maxValue)
-                            }
+                            onAmountChange.invoke(newText)
+
                         },
                         modifier = Modifier
                             .width(IntrinsicSize.Min)
@@ -364,9 +389,9 @@ fun ColumnScope.AmountInputField() {
                         text = "SOL",
                         style = TextStyle(
                             fontSize = when {
-                                text.text.length > 9 -> 16.sp
-                                text.text.length > 6 -> 24.sp
-                                text.text.length > 3 -> 32.sp
+                                tokenText.text.length > 9 -> 16.sp
+                                tokenText.text.length > 6 -> 24.sp
+                                tokenText.text.length > 3 -> 32.sp
                                 else -> 52.sp
                             },
                             color = Color.White,
@@ -377,7 +402,7 @@ fun ColumnScope.AmountInputField() {
                 }
 
                 Text(
-                    text = "$0.00",
+                    text = "$${usdText.text}",
                     style = TextStyle(
                         fontSize = 32.sp,
                         color = Color("#A5A5A5".toColorInt()),

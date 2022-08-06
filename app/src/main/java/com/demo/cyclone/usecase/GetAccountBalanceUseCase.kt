@@ -21,21 +21,4 @@ object GetAccountBalanceUseCase {
             lamports = balance?.result?.value ?: 0f
         )
     }
-
-    suspend fun getUSDQuote(
-        context: Context,
-        symbol: String,
-        slug: String? = null,
-    ): Float? {
-        val cmcRepository = CMCRepository.getInstance()
-
-        val quote = cmcRepository.getQuote(
-            symbol = symbol, context = context
-        )
-
-        return quote?.getQuoteUSD(
-            symbol = symbol,
-            slug = slug
-        )
-    }
 }

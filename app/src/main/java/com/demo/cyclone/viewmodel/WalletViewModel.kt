@@ -12,6 +12,7 @@ import com.demo.cyclone.ui.models.TokenModel
 import com.demo.cyclone.ui.state.WalletUiState
 import com.demo.cyclone.usecase.CreateWalletUseCase
 import com.demo.cyclone.usecase.GetAccountBalanceUseCase
+import com.demo.cyclone.usecase.GetQuoteUseCase
 import com.demo.cyclone.usecase.RetrieveWalletUseCase
 import kotlinx.coroutines.flow.*
 
@@ -71,7 +72,7 @@ class WalletViewModel: ViewModel() {
     }
 
     private suspend fun onTokenList(context: Context, tokens: List<TokenModel>) {
-        val quote = GetAccountBalanceUseCase.getUSDQuote(
+        val quote = GetQuoteUseCase.getUSDQuote(
             context = context,
             symbol = "SOL",
             slug = "solana",
