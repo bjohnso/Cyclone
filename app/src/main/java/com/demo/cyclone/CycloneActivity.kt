@@ -45,7 +45,7 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.TransactionSelectAmountScreen.route
+                        startDestination = Screen.SplashScreen.route
                     ) {
                         composable(route = Screen.SplashScreen.route) {
                             SplashScreen(
@@ -102,7 +102,7 @@ class CycloneActivity : ComponentActivity(), NavigatorInterface {
                 }
             }
 
-//            onStartUp()
+            onStartUp()
         }
     }
 

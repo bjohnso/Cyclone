@@ -13,4 +13,9 @@ class TransactionSelectAddressViewModel: ViewModel() {
         policy = neverEqualPolicy()
     )
         private set
+
+    fun updateAddress(address: String) {
+        uiState.recipientAddress = address
+        uiState = uiState
+    }
 }

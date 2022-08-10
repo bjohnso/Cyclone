@@ -21,6 +21,10 @@ class TokenTransferRepository(context: Context) {
         return@withContext tokenTransfer
     }
 
+    suspend fun getTokenTransfer(sender: String) = withContext(Dispatchers.IO) {
+        return@withContext db.tokenTransferDao().retrieveTokenTransferBySender(sender)
+    }
+
     companion object {
         private var instance: TokenTransferRepository? = null
 

@@ -92,8 +92,8 @@ fun TransactionSelectAddress(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Top
             ) {
-                AddressInputField { address ->
-                    viewModel.uiState.recipientAddress = address
+                AddressInputField(viewModel.uiState.recipientAddress) { address ->
+                    viewModel.updateAddress(address)
                 }
 
                 Spacer(modifier = Modifier.padding(bottom = 5.dp))
@@ -140,7 +140,9 @@ fun TransactionSelectAddress(
                 AddressList(addressLists = listOf(
                     testClipboardList,
                     testAddressBookList
-                ))
+                )) { address ->
+                    viewModel.updateAddress(address.address)
+                }
 
                 NextButton {
                     coroutine.launch {
@@ -148,6 +150,10 @@ fun TransactionSelectAddress(
                             context = context,
                             viewModel.uiState.recipientAddress
                         )
+
+                        if (success) {
+                            navigatorInterface?.navigate(Screen.TransactionSelectAmountScreen.route)
+                        }
                     }
                 }
             }
@@ -211,7 +217,7 @@ fun SelectAddressAppBar() {
 }
 
 @Composable
-fun ColumnScope.AddressList(addressLists: List<AddressListModel>) {
+fun ColumnScope.AddressList(addressLists: List<AddressListModel>, onClick: (addressModel: AddressModel) -> Unit) {
     val configuration = LocalConfiguration.current
 
     val items = addressLists.flatMap {
@@ -244,8 +250,12 @@ fun ColumnScope.AddressList(addressLists: List<AddressListModel>) {
                 is HeaderModel -> HeaderItem(model)
                 is AddressModel -> {
                     when (model.type) {
-                        AddressListModel.Type.CLIPBOARD -> ClipboardItem(model)
-                        AddressListModel.Type.ADDRESS_BOOK -> AddressItem(model)
+                        AddressListModel.Type.CLIPBOARD -> ClipboardItem(model) {
+                            onClick.invoke(it)
+                        }
+                        AddressListModel.Type.ADDRESS_BOOK -> AddressItem(model) {
+                            onClick.invoke(it)
+                        }
                     }
                 }
             }
@@ -267,9 +277,13 @@ fun HeaderItem(header: HeaderModel) {
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ClipboardItem(address: AddressModel) {
-    Surface(elevation = 10.dp) {
+fun ClipboardItem(address: AddressModel, onClick: (address: AddressModel) -> Unit) {
+    Surface(
+        elevation = 10.dp,
+        onClick = { onClick.invoke(address) }
+    ) {
         Row(
             modifier = Modifier
                 .background(
@@ -340,9 +354,13 @@ fun ClipboardItem(address: AddressModel) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AddressItem(address: AddressModel) {
-    Surface(elevation = 10.dp) {
+fun AddressItem(address: AddressModel, onClick: (addressModel: AddressModel) -> Unit) {
+    Surface(
+        elevation = 10.dp,
+        onClick = { onClick.invoke(address) }
+    ) {
         Row(
             modifier = Modifier
                 .background(
@@ -422,11 +440,11 @@ fun AddressItem(address: AddressModel) {
 }
 
 @Composable
-fun AddressInputField(onAddressChanged: (String) -> Unit) {
+fun AddressInputField(address: String, onAddressChanged: (String) -> Unit) {
     val configuration = LocalConfiguration.current
 
-    var text by remember {
-        mutableStateOf("")
+    var text by remember(address) {
+        mutableStateOf(address)
     }
 
     Row(

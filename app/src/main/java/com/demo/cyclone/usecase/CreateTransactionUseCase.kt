@@ -17,9 +17,7 @@ object CreateTransactionUseCase {
                 .newTokenTransfer(
                     recipient = recipient,
                     sender = wallet
-                )
-
-            true
+                ) != null
         } else false
     }
 }

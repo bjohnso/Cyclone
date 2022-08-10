@@ -35,6 +35,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.solver.state.Dimension
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -68,6 +70,9 @@ fun TransactionSelectAmountScreen(
     )[TransactionSelectAmountViewModel::class.java]
 
     LaunchedEffect(true) {
+        viewModel.flowOnTransaction(context).collect {
+            viewModel.updateTransaction(it)
+        }
         viewModel.getUSDQuote(context)
     }
 
@@ -101,9 +106,7 @@ fun TransactionSelectAmountScreen(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Top
             ) {
-                AddressInputFieldSelectAmount { address ->
-//                    viewModel.uiState.recipientAddress = address
-                }
+                AddressInputFieldSelectAmount(viewModel.uiState.recipientAddress) { address -> }
 
                 Divider(
                     color = Color("#A5A5A5".toColorInt()),
@@ -113,7 +116,7 @@ fun TransactionSelectAmountScreen(
                 Spacer(modifier = Modifier.padding(bottom = 5.dp))
 
                 AmountInputField(
-                    viewModel.uiState.tokenAmount.toInt(),
+                    viewModel.uiState.tokenAmount,
                     viewModel.getDisplayTokenAmount(),
                     viewModel.getDisplayUsdAmount(),
 
@@ -241,8 +244,8 @@ fun ColumnScope.BalancePreview() {
                     start = configuration.widthPercentageDP(5f),
                     end = configuration.widthPercentageDP(5f)
                 )
-                .height(configuration.heightPercentageDP(5f))
-                .aspectRatio(2.5f),
+                .height(IntrinsicSize.Min)
+                .width(IntrinsicSize.Min),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color("#2C2C2C".toColorInt())
             ),
@@ -252,7 +255,7 @@ fun ColumnScope.BalancePreview() {
                 modifier = Modifier.align(Alignment.CenterVertically),
                 text = "Max",
                 style = TextStyle(
-                    fontSize = configuration.heightPercentageSP(5f),
+                    fontSize = 18.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
@@ -265,7 +268,7 @@ fun ColumnScope.BalancePreview() {
 
 @Composable
 fun ColumnScope.AmountInputField(
-    key: Int,
+    key: Float,
     tokenAmount: String,
     usdAmount: String,
     onAmountChange: (amount: String) -> Unit
@@ -371,6 +374,9 @@ fun ColumnScope.AmountInputField(
                                     newText += newChars
                             }
 
+                            val parts = newText.split('.')
+                            newText = parts.take(2).joinToString(".")
+
                             tokenText = TextFieldValue(
                                 text = newText,
                                 selection = TextRange(newText.length)
@@ -445,11 +451,11 @@ fun ColumnScope.AmountInputField(
 }
 
 @Composable
-fun AddressInputFieldSelectAmount(onAddressChanged: (String) -> Unit) {
+fun AddressInputFieldSelectAmount(address: String, onAddressChanged: (String) -> Unit) {
     val configuration = LocalConfiguration.current
 
     var text by remember {
-        mutableStateOf("")
+        mutableStateOf(address)
     }
 
     Row(
