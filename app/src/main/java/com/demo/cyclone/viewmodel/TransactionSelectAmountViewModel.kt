@@ -8,12 +8,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.demo.cyclone.entity.TokenTransferEntity
+import com.demo.cyclone.ui.models.SolanaAccountModel
 import com.demo.cyclone.ui.state.TransactionSelectAmountUiState
-import com.demo.cyclone.usecase.GetQuoteUseCase
-import com.demo.cyclone.usecase.GetTransactionUseCase
+import com.demo.cyclone.usecase.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class TransactionSelectAmountViewModel: ViewModel() {
@@ -31,6 +32,25 @@ class TransactionSelectAmountViewModel: ViewModel() {
         }.distinctUntilChanged()
     }
 
+    fun flowOnWallet(context: Context): Flow<SolanaAccountModel?> {
+        return flow {
+            val keyPair = RetrieveWalletUseCase.retrieveCurrentWallet(
+                context = context
+            ) ?: CreateWalletUseCase.createKeypair(
+                context = context
+            )
+
+            emit(
+                if (keyPair?.publicKey != null) {
+                    GetAccountBalanceUseCase.getAccountBalance(
+                        context = context,
+                        pubKey = keyPair.publicKey,
+                    )
+                } else null
+            )
+        }.distinctUntilChanged()
+    }
+
     fun getDisplayTokenAmount(): String {
         return if (uiState.tokenAmount == 0f) {
             ""
@@ -43,6 +63,11 @@ class TransactionSelectAmountViewModel: ViewModel() {
 
     fun updateTransaction(transferEntity: TokenTransferEntity?) {
         uiState.recipientAddress = transferEntity?.recipient ?: ""
+        uiState = uiState
+    }
+
+    fun updateWallet(solanaAccountModel: SolanaAccountModel?) {
+        uiState.walletBalance = solanaAccountModel?.solanaBalance ?: 0f
         uiState = uiState
     }
 

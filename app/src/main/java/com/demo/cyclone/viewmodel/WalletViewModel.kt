@@ -43,6 +43,10 @@ class WalletViewModel: ViewModel() {
             .onEach { onWallet(it) }
     }
 
+    fun setLoading() {
+        uiState = uiState.copy(isLoading = true)
+    }
+
     fun flowOnTokenList(context: Context, accountModel: SolanaAccountModel): Flow<List<TokenModel>> {
         return flow {
             emit(

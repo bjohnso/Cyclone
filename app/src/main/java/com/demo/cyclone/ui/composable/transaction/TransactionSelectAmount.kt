@@ -1,13 +1,11 @@
 package com.demo.cyclone.ui.composable.transaction
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
@@ -35,25 +33,18 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.solver.state.Dimension
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.demo.cyclone.R
-import com.demo.cyclone.extensions.ConfigurationExtensions.heightPercentageDP
-import com.demo.cyclone.extensions.ConfigurationExtensions.heightPercentageSP
 import com.demo.cyclone.extensions.ConfigurationExtensions.widthPercentageDP
-import com.demo.cyclone.extensions.ConfigurationExtensions.widthPercentageSP
 import com.demo.cyclone.extensions.ContextExtensions.activity
 import com.demo.cyclone.extensions.StringExtensions.isDecimal
 import com.demo.cyclone.interfaces.NavigatorInterface
 import com.demo.cyclone.ui.composable.shared.LockScreenOrientation
 import com.demo.cyclone.ui.composable.shared.SystemUi
-import com.demo.cyclone.viewmodel.TransactionSelectAddressViewModel
 import com.demo.cyclone.viewmodel.TransactionSelectAmountViewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 @Composable
 fun TransactionSelectAmountScreen(
@@ -72,6 +63,9 @@ fun TransactionSelectAmountScreen(
     LaunchedEffect(true) {
         viewModel.flowOnTransaction(context).collect {
             viewModel.updateTransaction(it)
+        }
+        viewModel.flowOnWallet(context).collect {
+            viewModel.updateWallet(it)
         }
         viewModel.getUSDQuote(context)
     }
@@ -132,7 +126,7 @@ fun TransactionSelectAmountScreen(
                     thickness = .5.dp
                 )
 
-                BalancePreview()
+                BalancePreview(viewModel.uiState.walletBalance)
 
                 Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
@@ -200,7 +194,7 @@ fun AppBar() {
 }
 
 @Composable
-fun ColumnScope.BalancePreview() {
+fun ColumnScope.BalancePreview(solBalance: Float) {
     val configuration = LocalConfiguration.current
 
     Row(
@@ -225,7 +219,7 @@ fun ColumnScope.BalancePreview() {
             )
 
             Text(
-                text = "0 SOL",
+                text = "$solBalance SOL",
                 style = TextStyle(
                     fontSize = 18.sp,
                     color = Color.White,
@@ -454,7 +448,7 @@ fun ColumnScope.AmountInputField(
 fun AddressInputFieldSelectAmount(address: String, onAddressChanged: (String) -> Unit) {
     val configuration = LocalConfiguration.current
 
-    var text by remember {
+    var text by remember(address) {
         mutableStateOf(address)
     }
 

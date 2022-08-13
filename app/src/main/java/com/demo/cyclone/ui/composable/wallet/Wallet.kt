@@ -37,7 +37,10 @@ import com.demo.cyclone.ui.composable.shared.SystemUi
 import com.demo.cyclone.ui.models.TokenModel
 import com.demo.cyclone.ui.navigation.Screen
 import com.demo.cyclone.viewmodel.WalletViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Composable
 fun WalletScreen(
@@ -46,6 +49,7 @@ fun WalletScreen(
 ) {
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     val viewModel = ViewModelProvider(
         LocalContext.current.activity() as ViewModelStoreOwner
@@ -76,63 +80,77 @@ fun WalletScreen(
 
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color("#222222".toColorInt()),
-                        Color("#222222".toColorInt()),
-                    )
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(bottom = 50.dp)
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Top
-        ) {
-            WalletAddressTitle(viewModel.uiState.currentAddress ?: "")
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(viewModel.uiState.isLoading),
+        onRefresh = {
+            viewModel.setLoading()
 
-            Spacer(
-                modifier = Modifier.padding(
-                    top = configuration.heightPercentageDP(5f)
-                )
-            )
-
-            WalletTotalBalance(viewModel.uiState.currentTotalBalance)
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .padding(
-                        start = configuration.widthPercentageDP(10f),
-                        end = configuration.widthPercentageDP(10f)
-                    )
-                    .fillMaxWidth()
-            ) {
-                WalletActionButton(text = "Deposit") {
-
-                }
-                WalletActionButton(text = "Send") {
-                    navigatorInterface?.navigate(Screen.TransactionSelectAddressScreen.route)
+            coroutine.launch {
+                flowOnWallet.collect { account ->
+                    account?.let {
+                        viewModel.flowOnTokenList(
+                            context = context,
+                            accountModel = it
+                        ).collect()
+                    }
                 }
             }
-
-            Spacer(
-                modifier = Modifier.padding(
-                    top = configuration.heightPercentageDP(5f)
+        },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color("#222222".toColorInt()),
+                            Color("#222222".toColorInt()),
+                        )
+                    )
                 )
-            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 50.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                WalletAddressTitle(viewModel.uiState.currentAddress ?: "")
 
-            if (viewModel.uiState.isLoading) {
-                Spinner()
-            } else {
+                Spacer(
+                    modifier = Modifier.padding(
+                        top = configuration.heightPercentageDP(5f)
+                    )
+                )
+
+                WalletTotalBalance(viewModel.uiState.currentTotalBalance)
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(
+                            start = configuration.widthPercentageDP(10f),
+                            end = configuration.widthPercentageDP(10f)
+                        )
+                        .fillMaxWidth()
+                ) {
+                    WalletActionButton(text = "Deposit") {
+
+                    }
+                    WalletActionButton(text = "Send") {
+                        navigatorInterface?.navigate(Screen.TransactionSelectAddressScreen.route)
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.padding(
+                        top = configuration.heightPercentageDP(5f)
+                    )
+                )
+
                 TokenList(
                     tokenList = viewModel.uiState.tokens ?: listOf()
                 )
